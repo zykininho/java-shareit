@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.ConflictException;
 import ru.practicum.shareit.exception.ValidationException;
-import ru.practicum.shareit.user.UserMapper;
+import ru.practicum.shareit.user.mapper.UserMapper;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.storage.UserStorage;
 import ru.practicum.shareit.user.model.User;
@@ -32,16 +32,17 @@ public class UserServiceImpl implements UserService {
 
     private void validateToCreate(User user) {
         String email = user.getEmail();
-        List<UserDto> usersDto = getAll();
-        List<User> users = usersDto.stream().map(UserMapper::toUser).collect(Collectors.toList());
+        if (email == null) {
+            log.info("У пользователя {} не задана электронная почта", user);
+            throw new ValidationException();
+        }
+        if (!email.contains("@")) {
+            log.info("У пользователя {} указана неверная электронная почта", user);
+            throw new ValidationException();
+        }
+        List<User> users = getAll().stream().map(UserMapper::toUser).collect(Collectors.toList());
         for (User userToCheck : users) {
-            if (email == null) {
-                log.info("У пользователя не задана электронная почта");
-                throw new ValidationException();
-            } else if (!email.contains("@")) {
-                log.info("У пользователя указана неверная электронная почта");
-                throw new ValidationException();
-            } else if (userToCheck.getEmail().equals(user.getEmail())) {
+            if (userToCheck.getEmail().equals(email)) {
                 log.info("В системе уже есть пользователь c id {} с такой же почтой {}",
                         userToCheck.getId(),
                         userToCheck.getEmail());
@@ -59,11 +60,10 @@ public class UserServiceImpl implements UserService {
     private void validateToUpdate(long userId, User user) {
         String email = user.getEmail();
         if (email != null && !email.contains("@")) {
-            log.info("У пользователя указана неверная электронная почта");
+            log.info("У пользователя {} указана неверная электронная почта", user);
             throw new ValidationException();
         }
-        List<UserDto> usersDto = getAll();
-        List<User> users = usersDto.stream().map(UserMapper::toUser).collect(Collectors.toList());
+        List<User> users = getAll().stream().map(UserMapper::toUser).collect(Collectors.toList());
         for (User userToCheck : users) {
             if (userToCheck.getId() != userId && userToCheck.getEmail().equals(email)) {
                 log.info("В системе уже есть пользователь c id {} с такой же почтой {}",

@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 public class InMemoreUserStorage implements UserStorage {
 
     private final HashMap<Long, User> users = new HashMap<>();
-    private long userId = 0;
+    private long userId;
 
     @Override
     public List<User> getAll() {
@@ -45,7 +45,7 @@ public class InMemoreUserStorage implements UserStorage {
             userToUpdate.setEmail(user.getEmail());
         }
         users.put(userId, userToUpdate);
-        log.info("Обновлены данные пользователя с id {}. Новые данные: {}", userId, user);
+        log.info("Обновлены данные пользователя с id {}. Новые данные: {}", userId, userToUpdate);
         return userToUpdate;
     }
 

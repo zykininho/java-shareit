@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.user.UserMapper;
+import ru.practicum.shareit.user.mapper.UserMapper;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserServiceImpl;
 
@@ -20,12 +20,13 @@ import org.apache.commons.lang3.StringUtils;
 public class InMemoryItemStorage implements ItemStorage {
 
     private final HashMap<Long, Item> items = new HashMap<>();
-    private long itemId = 0;
+    private long itemId;
     private final UserServiceImpl userService;
 
     @Override
     public Item addNewItem(long userId, Item item) {
-        item.setOwner(UserMapper.toUser(userService.getUser(userId)));
+        User owner = UserMapper.toUser(userService.getUser(userId));
+        item.setOwner(owner);
         item.setId(++this.itemId);
         items.put(item.getId(), item);
         log.info("Добавлен новый предмет: {}", item);
@@ -36,11 +37,12 @@ public class InMemoryItemStorage implements ItemStorage {
     public Item updateItem(long userId, long itemId, Item item) {
         if (items.containsKey(itemId)) {
             Item itemToUpdate = items.get(itemId);
-            if (!itemToUpdate.getOwner().equals(UserMapper.toUser(userService.getUser(userId)))) {
+            User owner = UserMapper.toUser(userService.getUser(userId));
+            if (!itemToUpdate.getOwner().equals(owner)) {
                 log.info("У предмета с id {} указан другой владелец {}, обращается пользователь {}",
                         itemId,
                         itemToUpdate.getOwner(),
-                        userService.getUser(userId));
+                        owner);
                 throw new NotFoundException();
             }
             if (item.getName() != null) {

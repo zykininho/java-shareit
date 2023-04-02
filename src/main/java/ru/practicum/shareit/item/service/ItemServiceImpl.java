@@ -4,14 +4,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.ValidationException;
-import ru.practicum.shareit.item.ItemMapper;
+import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.storage.ItemStorage;
-import ru.practicum.shareit.request.ItemRequest;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -24,19 +23,18 @@ public class ItemServiceImpl implements ItemService {
     public ItemDto addNewItem(long userId, ItemDto itemDto) {
         validate(itemDto);
         Item item = ItemMapper.toItem(itemDto);
-        item = itemStorage.addNewItem(userId, item);
-        return ItemMapper.toItemDto(item);
+        return ItemMapper.toItemDto(itemStorage.addNewItem(userId, item));
     }
 
     private void validate(ItemDto itemDto) {
         if (itemDto.getName() == null || itemDto.getName().isBlank()) {
-            log.info("В предмете не указано наименование");
-            throw new ValidationException();
-        } else if (itemDto.getAvailable() == null) {
-            log.info("В предмете не указан статус доступности");
+            log.info("В предмете {} не указано наименование", itemDto);
             throw new ValidationException();
         } else if (itemDto.getDescription() == null || itemDto.getDescription().isBlank()) {
-            log.info("В предмете не указано описание");
+            log.info("В предмете {} не указано описание", itemDto);
+            throw new ValidationException();
+        } else if (itemDto.getAvailable() == null) {
+            log.info("В предмете {} не указан статус доступности", itemDto);
             throw new ValidationException();
         }
     }
@@ -44,8 +42,7 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public ItemDto updateItem(long userId, long itemId, ItemDto itemDto) {
         Item item = ItemMapper.toItem(itemDto);
-        item = itemStorage.updateItem(userId, itemId, item);
-        return ItemMapper.toItemDto(item);
+        return ItemMapper.toItemDto(itemStorage.updateItem(userId, itemId, item));
     }
 
     @Override
@@ -56,23 +53,19 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public List<ItemDto> getOwnerItems(long userId) {
         List<Item> ownerItems = itemStorage.getOwnerItems(userId);
-        List<ItemDto> ownerItemsDto = new ArrayList<>();
-        for (Item ownerItem : ownerItems) {
-            ItemDto itemDto = ItemMapper.toItemDto(ownerItem);
-            ownerItemsDto.add(itemDto);
-        }
-        return ownerItemsDto;
+        return ownerItems
+                .stream()
+                .map(ItemMapper::toItemDto)
+                .collect(Collectors.toList());
     }
 
     @Override
     public List<ItemDto> search(long userId, String text) {
         List<Item> foundItems = itemStorage.search(userId, text);
-        List<ItemDto> foundItemsDto = new ArrayList<>();
-        for (Item foundItem : foundItems) {
-            ItemDto itemDto = ItemMapper.toItemDto(foundItem);
-            foundItemsDto.add(itemDto);
-        }
-        return foundItemsDto;
+        return foundItems
+                .stream()
+                .map(ItemMapper::toItemDto)
+                .collect(Collectors.toList());
     }
 
 }

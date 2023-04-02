@@ -4,4 +4,7 @@ import lombok.NoArgsConstructor;
 
 @NoArgsConstructor
 public class ConflictException extends RuntimeException {
+
+
+
 }
