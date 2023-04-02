@@ -2,6 +2,7 @@ package ru.practicum.shareit.user.storage;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
+import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.user.model.User;
 
 import java.util.HashMap;
@@ -24,31 +25,32 @@ public class InMemoreUserStorage implements UserStorage {
     @Override
     public User create(User user) {
         String name = user.getName();
-        String login = user.getLogin();
-        if (name == null || name.isEmpty()) {
-            user.setName(login);
-            log.info("Для пользователя с логином {} установлено новое имя {}", login, user.getName());
-        }
-        user.setId(++this.id);
+        user.setId(++this.userId);
         users.put(user.getId(), user);
         log.info("Добавлен новый пользователь: {}", user);
         return user;
     }
 
     @Override
-    public User update(User user) {
-        int userId = user.getId();
+    public User update(long userId, User user) {
         if (!users.containsKey(userId)) {
             log.info("Не найден пользователь в списке с id: {}", userId);
             throw new NotFoundException();
         }
-        users.put(userId, user);
+        User userToUpdate = users.get(userId);
+        if (user.getName() != null) {
+            userToUpdate.setName(user.getName());
+        }
+        if (user.getEmail() != null) {
+            userToUpdate.setEmail(user.getEmail());
+        }
+        users.put(userId, userToUpdate);
         log.info("Обновлены данные пользователя с id {}. Новые данные: {}", userId, user);
-        return user;
+        return userToUpdate;
     }
 
     @Override
-    public User getUser(Integer userId) {
+    public User getUser(long userId) {
         if (users.containsKey(userId)) {
             return users.get(userId);
         } else {
@@ -57,14 +59,7 @@ public class InMemoreUserStorage implements UserStorage {
     }
 
     @Override
-    public void deleteAll() {
-        users.clear();
-    }
-
-    @Override
-    public void deleteUser(Integer userId) {
-        if (users.containsKey(userId)) {
-            users.remove(userId);
-        }
+    public void deleteUser(long userId) {
+        users.remove(userId);
     }
 }

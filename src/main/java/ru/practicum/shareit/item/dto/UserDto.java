@@ -15,10 +15,4 @@ public class UserDto {
     User owner;
     long requestId;
 
-    public UserDto(String name, String description, boolean available, long requestId) {
-        this.name = name;
-        this.description = description;
-        this.available = available;
-        this.requestId = requestId;
-    }
 }

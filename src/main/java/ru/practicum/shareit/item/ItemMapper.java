@@ -5,7 +5,7 @@ import ru.practicum.shareit.item.model.User;
 
 public class ItemMapper {
 
-    public static UserDto toItemDto(User item) {
+/*    public static UserDto toItemDto(User item) {
         return new UserDto(
                 item.getName(),
                 item.getDescription(),
@@ -18,9 +18,9 @@ public class ItemMapper {
         return new UserDto(
                 itemDto.getName(),
                 itemDto.getDescription(),
-                itemDto.isAvailable(),
+                itemDto.isAvailable()
                 //itemDto.getRequestId()
         );
-    }
+    }*/
 
 }

@@ -15,10 +15,4 @@ public class User {
     User owner;
     ItemRequest request;
 
-    public User(String name, String description, boolean available, ItemRequest request) {
-        this.name = name;
-        this.description = description;
-        this.available = available;
-        this.request = request;
-    }
 }
