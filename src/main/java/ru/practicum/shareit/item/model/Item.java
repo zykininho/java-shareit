@@ -3,16 +3,17 @@ package ru.practicum.shareit.item.model;
 import lombok.Builder;
 import lombok.Data;
 import ru.practicum.shareit.request.ItemRequest;
+import ru.practicum.shareit.user.model.User;
 
 @Data
 @Builder
-public class User {
+public class Item {
 
     long id;
     String name;
     String description;
-    boolean available;
+    Boolean available;
     User owner;
-    ItemRequest request;
+    long request;
 
 }

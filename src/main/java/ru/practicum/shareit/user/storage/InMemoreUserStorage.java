@@ -3,6 +3,7 @@ package ru.practicum.shareit.user.storage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.exception.NotFoundException;
+import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.user.model.User;
 
 import java.util.HashMap;
@@ -24,7 +25,6 @@ public class InMemoreUserStorage implements UserStorage {
 
     @Override
     public User create(User user) {
-        String name = user.getName();
         user.setId(++this.userId);
         users.put(user.getId(), user);
         log.info("Добавлен новый пользователь: {}", user);
@@ -51,7 +51,9 @@ public class InMemoreUserStorage implements UserStorage {
 
     @Override
     public User getUser(long userId) {
-        if (users.containsKey(userId)) {
+        if (userId == 0) {
+            throw new ValidationException();
+        } else if (users.containsKey(userId)) {
             return users.get(userId);
         } else {
             throw new NotFoundException();

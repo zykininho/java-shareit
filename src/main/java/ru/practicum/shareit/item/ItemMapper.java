@@ -1,26 +1,35 @@
 package ru.practicum.shareit.item;
 
-import ru.practicum.shareit.item.dto.UserDto;
-import ru.practicum.shareit.item.model.User;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
+import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.item.service.ItemService;
 
+@Component
+@RequiredArgsConstructor
 public class ItemMapper {
 
-/*    public static UserDto toItemDto(User item) {
-        return new UserDto(
-                item.getName(),
-                item.getDescription(),
-                item.isAvailable(),
-                item.getRequest() != null ? item.getRequest().getId() : null
-        );
+    private final ItemService itemService;
+
+    public static ItemDto toItemDto(Item item) {
+        return ItemDto.builder()
+                .id(item.getId())
+                .name(item.getName())
+                .description(item.getDescription())
+                .available(item.getAvailable())
+                .request(item.getRequest())
+                .build();
     }
 
-    public static User toItem(UserDto itemDto) {
-        return new UserDto(
-                itemDto.getName(),
-                itemDto.getDescription(),
-                itemDto.isAvailable()
-                //itemDto.getRequestId()
-        );
-    }*/
+    public static Item toItem(ItemDto itemDto) {
+        return Item.builder()
+                .id(itemDto.getId())
+                .name(itemDto.getName())
+                .description(itemDto.getDescription())
+                .available(itemDto.getAvailable())
+                .request(itemDto.getRequest())
+                .build();
+    }
 
 }

@@ -6,13 +6,13 @@ import ru.practicum.shareit.user.model.User;
 
 @Data
 @Builder
-public class UserDto {
+public class ItemDto {
 
     long id;
     String name;
     String description;
-    boolean available;
+    Boolean available;
     User owner;
-    long requestId;
+    long request;
 
 }
