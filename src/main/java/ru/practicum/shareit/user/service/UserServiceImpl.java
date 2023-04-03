@@ -2,6 +2,7 @@ package ru.practicum.shareit.user.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.ConflictException;
 import ru.practicum.shareit.exception.ValidationException;
@@ -19,15 +20,17 @@ import java.util.stream.Collectors;
 public class UserServiceImpl implements UserService {
 
     private final UserStorage userStorage;
+    @Autowired
+    private UserMapper userMapper;
 
     public List<UserDto> getAll() {
-        return userStorage.getAll().stream().map(UserMapper::toUserDto).collect(Collectors.toList());
+        return userStorage.getAll().stream().map(userMapper::toUserDto).collect(Collectors.toList());
     }
 
     public UserDto create(UserDto userDto) {
-        User user = UserMapper.toUser(userDto);
+        User user = userMapper.toUser(userDto);
         validateToCreate(user);
-        return UserMapper.toUserDto(userStorage.create(user));
+        return userMapper.toUserDto(userStorage.create(user));
     }
 
     private void validateToCreate(User user) {
@@ -40,7 +43,7 @@ public class UserServiceImpl implements UserService {
             log.info("У пользователя {} указана неверная электронная почта", user);
             throw new ValidationException();
         }
-        List<User> users = getAll().stream().map(UserMapper::toUser).collect(Collectors.toList());
+        List<User> users = getAll().stream().map(userMapper::toUser).collect(Collectors.toList());
         for (User userToCheck : users) {
             if (userToCheck.getEmail().equals(email)) {
                 log.info("В системе уже есть пользователь c id {} с такой же почтой {}",
@@ -52,9 +55,9 @@ public class UserServiceImpl implements UserService {
     }
 
     public UserDto update(long userId, UserDto userDto) {
-        User user = UserMapper.toUser(userDto);
+        User user = userMapper.toUser(userDto);
         validateToUpdate(userId, user);
-        return UserMapper.toUserDto(userStorage.update(userId, user));
+        return userMapper.toUserDto(userStorage.update(userId, user));
     }
 
     private void validateToUpdate(long userId, User user) {
@@ -63,7 +66,7 @@ public class UserServiceImpl implements UserService {
             log.info("У пользователя {} указана неверная электронная почта", user);
             throw new ValidationException();
         }
-        List<User> users = getAll().stream().map(UserMapper::toUser).collect(Collectors.toList());
+        List<User> users = getAll().stream().map(userMapper::toUser).collect(Collectors.toList());
         for (User userToCheck : users) {
             if (userToCheck.getId() != userId && userToCheck.getEmail().equals(email)) {
                 log.info("В системе уже есть пользователь c id {} с такой же почтой {}",
@@ -75,7 +78,7 @@ public class UserServiceImpl implements UserService {
     }
 
     public UserDto getUser(long userId) {
-        return UserMapper.toUserDto(userStorage.getUser(userId));
+        return userMapper.toUserDto(userStorage.getUser(userId));
     }
 
     public void deleteUser(long userId) {

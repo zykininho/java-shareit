@@ -2,6 +2,7 @@ package ru.practicum.shareit.item.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.item.mapper.ItemMapper;
@@ -18,12 +19,14 @@ import java.util.stream.Collectors;
 public class ItemServiceImpl implements ItemService {
 
     private final ItemStorage itemStorage;
+    @Autowired
+    private ItemMapper itemMapper;
 
     @Override
     public ItemDto addNewItem(long userId, ItemDto itemDto) {
         validate(itemDto);
-        Item item = ItemMapper.toItem(itemDto);
-        return ItemMapper.toItemDto(itemStorage.addNewItem(userId, item));
+        Item item = itemMapper.toItem(itemDto);
+        return itemMapper.toItemDto(itemStorage.addNewItem(userId, item));
     }
 
     private void validate(ItemDto itemDto) {
@@ -41,13 +44,13 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemDto updateItem(long userId, long itemId, ItemDto itemDto) {
-        Item item = ItemMapper.toItem(itemDto);
-        return ItemMapper.toItemDto(itemStorage.updateItem(userId, itemId, item));
+        Item item = itemMapper.toItem(itemDto);
+        return itemMapper.toItemDto(itemStorage.updateItem(userId, itemId, item));
     }
 
     @Override
     public ItemDto getItem(long userId, long itemId) {
-        return ItemMapper.toItemDto(itemStorage.getItem(userId, itemId));
+        return itemMapper.toItemDto(itemStorage.getItem(userId, itemId));
     }
 
     @Override
@@ -55,7 +58,7 @@ public class ItemServiceImpl implements ItemService {
         List<Item> ownerItems = itemStorage.getOwnerItems(userId);
         return ownerItems
                 .stream()
-                .map(ItemMapper::toItemDto)
+                .map(itemMapper::toItemDto)
                 .collect(Collectors.toList());
     }
 
@@ -64,7 +67,7 @@ public class ItemServiceImpl implements ItemService {
         List<Item> foundItems = itemStorage.search(userId, text);
         return foundItems
                 .stream()
-                .map(ItemMapper::toItemDto)
+                .map(itemMapper::toItemDto)
                 .collect(Collectors.toList());
     }
 
