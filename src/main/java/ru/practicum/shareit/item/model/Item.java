@@ -1,24 +1,24 @@
 package ru.practicum.shareit.item.model;
 
-import lombok.Builder;
-import lombok.Data;
-import lombok.ToString;
+import lombok.*;
 import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.user.model.User;
 
 import javax.persistence.*;
 
-@Data
-@Builder
 @Entity
 @Table(name = "items")
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
 public class Item {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column
     private String name;
 
     @Column
@@ -31,7 +31,7 @@ public class Item {
     @ToString.Exclude
     private User owner;
 
-    @Column(name = "request_id")
+    @ManyToOne
     private ItemRequest request;
 
     @Override

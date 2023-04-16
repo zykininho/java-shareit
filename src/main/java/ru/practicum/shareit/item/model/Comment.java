@@ -1,15 +1,17 @@
 package ru.practicum.shareit.item.model;
 
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 import ru.practicum.shareit.user.model.User;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 
-@Data
-@Builder
 @Entity
 @Table(name = "comments")
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
 public class Comment {
 
     @Id
@@ -24,5 +26,7 @@ public class Comment {
 
     @ManyToOne(fetch = FetchType.LAZY)
     private User author;
+
+    private LocalDateTime created;
 
 }

@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
+//    private long userId;
     private final UserRepository userRepository;
     @Autowired
     private UserMapper userMapper;
@@ -35,7 +36,11 @@ public class UserServiceImpl implements UserService {
     public UserDto create(UserDto userDto) {
         User user = userMapper.toUser(userDto);
         validateToCreate(user);
-        return userMapper.toUserDto(userRepository.save(user));
+//        user.setId(++userId);
+//        checkEmailDuplicate(user);
+        user = userRepository.save(user);
+        log.info("Добавлен новый пользователь: {}", user);
+        return userMapper.toUserDto(user);
     }
 
     private void validateToCreate(User user) {
@@ -48,6 +53,10 @@ public class UserServiceImpl implements UserService {
             log.info("У пользователя {} указана неверная электронная почта", user);
             throw new ValidationException();
         }
+    }
+
+    private void checkEmailDuplicate(User user) {
+        String email = user.getEmail();
         List<User> users = getAll().stream().map(userMapper::toUser).collect(Collectors.toList());
         for (User userToCheck : users) {
             if (userToCheck.getEmail().equals(email)) {
@@ -59,10 +68,28 @@ public class UserServiceImpl implements UserService {
         }
     }
 
+
     public UserDto update(long userId, UserDto userDto) {
-        User user = userMapper.toUser(userDto);
+        User user = findUser(userId);
+        if (userDto.getName() != null) {
+            user.setName(userDto.getName());
+        }
+        if (userDto.getEmail() != null) {
+            user.setEmail(userDto.getEmail());
+        }
         validateToUpdate(userId, user);
         return userMapper.toUserDto(userRepository.save(user));
+    }
+
+    private User findUser(long userId) {
+        if (userId == 0) {
+            throw new ValidationException();
+        }
+        Optional<User> user = userRepository.findById(userId);
+        if (user.isEmpty()) {
+            throw new NotFoundException();
+        }
+        return user.get();
     }
 
     private void validateToUpdate(long userId, User user) {

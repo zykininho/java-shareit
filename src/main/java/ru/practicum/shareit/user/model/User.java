@@ -1,14 +1,15 @@
 package ru.practicum.shareit.user.model;
 
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 
 import javax.persistence.*;
 
-@Data
-@Builder
 @Entity
-@Table(name = "users", schema = "public")
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
+@Table(name = "users", schema = "public", uniqueConstraints = @UniqueConstraint(columnNames = "email"))
 public class User {
 
     @Id

@@ -7,7 +7,7 @@ import ru.practicum.shareit.user.model.User;
 
 @Data
 @Builder
-public class ItemDto {
+public class ItemWithBookingDateDto {
 
     private long id;
     private String name;
