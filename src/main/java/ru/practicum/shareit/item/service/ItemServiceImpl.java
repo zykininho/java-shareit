@@ -14,6 +14,7 @@ import ru.practicum.shareit.user.mapper.UserMapper;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserService;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -34,6 +35,8 @@ public class ItemServiceImpl implements ItemService {
     public ItemDto addNewItem(long userId, ItemDto itemDto) {
         validate(itemDto);
         Item item = itemMapper.toItem(itemDto);
+        User owner = userMapper.toUser(userService.getUser(userId));
+        item.setOwner(owner);
         return itemMapper.toItemDto(itemRepository.save(item));
     }
 
@@ -65,8 +68,18 @@ public class ItemServiceImpl implements ItemService {
                     owner);
             throw new NotFoundException();
         }
-        Item item = itemMapper.toItem(itemDto);
-        return itemMapper.toItemDto(itemRepository.save(item));
+        if (itemDto.getName() != null) {
+            itemToUpdate.setName(itemDto.getName());
+        }
+        if (itemDto.getDescription() != null) {
+            itemToUpdate.setDescription(itemDto.getDescription());
+        }
+        if (itemDto.getAvailable() != null) {
+            itemToUpdate.setAvailable(itemDto.getAvailable());
+        }
+        Item savedItem = itemRepository.save(itemToUpdate);
+        log.info("Обновлен item: {}", savedItem);
+        return itemMapper.toItemDto(savedItem);
     }
 
     @Override
@@ -92,8 +105,10 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public List<ItemDto> search(long userId, String text) {
-        List<Item> foundItems =
-                itemRepository.search(text);
+        if (text.isBlank()) {
+            return new ArrayList<>();
+        }
+        List<Item> foundItems = itemRepository.search(text);
         return foundItems
                 .stream()
                 .map(itemMapper::toItemDto)
