@@ -10,7 +10,6 @@ import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.user.mapper.UserMapper;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.repo.UserRepository;
-import ru.practicum.shareit.user.storage.UserStorage;
 import ru.practicum.shareit.user.model.User;
 
 import java.util.List;
@@ -22,13 +21,11 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
-    private final UserStorage userStorage;
     private final UserRepository userRepository;
     @Autowired
     private UserMapper userMapper;
 
     public List<UserDto> getAll() {
-//        return userStorage.getAll().stream().map(userMapper::toUserDto).collect(Collectors.toList());
         List<User> users = userRepository.findAll();
         return users.stream()
                 .map(userMapper::toUserDto)
@@ -38,7 +35,6 @@ public class UserServiceImpl implements UserService {
     public UserDto create(UserDto userDto) {
         User user = userMapper.toUser(userDto);
         validateToCreate(user);
-//        return userMapper.toUserDto(userStorage.create(user));
         return userMapper.toUserDto(userRepository.save(user));
     }
 
@@ -66,7 +62,6 @@ public class UserServiceImpl implements UserService {
     public UserDto update(long userId, UserDto userDto) {
         User user = userMapper.toUser(userDto);
         validateToUpdate(userId, user);
-//        return userMapper.toUserDto(userStorage.update(userId, user));
         return userMapper.toUserDto(userRepository.save(user));
     }
 
@@ -88,7 +83,6 @@ public class UserServiceImpl implements UserService {
     }
 
     public UserDto getUser(long userId) {
-//        return userMapper.toUserDto(userStorage.getUser(userId));
         if (userId == 0) {
             throw new ValidationException();
         }
@@ -100,7 +94,6 @@ public class UserServiceImpl implements UserService {
     }
 
     public void deleteUser(long userId) {
-//        userStorage.deleteUser(userId);
         userRepository.deleteById(userId);
     }
 
