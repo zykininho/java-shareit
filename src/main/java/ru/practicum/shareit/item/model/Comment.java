@@ -1,26 +1,28 @@
-package ru.practicum.shareit.request.model;
+package ru.practicum.shareit.item.model;
 
 import lombok.Builder;
 import lombok.Data;
 import ru.practicum.shareit.user.model.User;
 
 import javax.persistence.*;
-import java.time.LocalDateTime;
 
 @Data
 @Builder
 @Entity
-@Table(name = "requests")
-public class ItemRequest {
+@Table(name = "comments")
+public class Comment {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
     @Column
-    private String description;
+    private String text;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    private User requestor;
+    private Item item;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    private User author;
 
 }
