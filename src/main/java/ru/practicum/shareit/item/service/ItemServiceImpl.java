@@ -93,7 +93,7 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public List<ItemDto> search(long userId, String text) {
         List<Item> foundItems =
-                itemRepository.findAllByAvailableAndNameOrDescriptionContainingIgnoreCase(true, text);
+                itemRepository.search(text);
         return foundItems
                 .stream()
                 .map(itemMapper::toItemDto)
