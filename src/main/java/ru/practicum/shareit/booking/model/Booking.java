@@ -1,7 +1,7 @@
 package ru.practicum.shareit.booking.model;
 
 import lombok.*;
-import ru.practicum.shareit.enums.Status;
+import ru.practicum.shareit.enums.BookingStatus;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
 
@@ -33,6 +33,6 @@ public class Booking {
     private User booker;
 
     @Enumerated(EnumType.STRING)
-    private Status status;
+    private BookingStatus status;
 
 }

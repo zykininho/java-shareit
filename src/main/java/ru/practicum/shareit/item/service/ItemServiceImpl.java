@@ -115,4 +115,15 @@ public class ItemServiceImpl implements ItemService {
                 .collect(Collectors.toList());
     }
 
+    public Item findItem(long itemId) {
+        if (itemId == 0) {
+            throw new ValidationException();
+        }
+        Optional<Item> item = itemRepository.findById(itemId);
+        if (item.isEmpty()) {
+            throw new NotFoundException();
+        }
+        return item.get();
+    }
+
 }

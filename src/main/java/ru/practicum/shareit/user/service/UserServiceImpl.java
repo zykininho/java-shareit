@@ -21,7 +21,6 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
-//    private long userId;
     private final UserRepository userRepository;
     @Autowired
     private UserMapper userMapper;
@@ -36,8 +35,6 @@ public class UserServiceImpl implements UserService {
     public UserDto create(UserDto userDto) {
         User user = userMapper.toUser(userDto);
         validateToCreate(user);
-//        user.setId(++userId);
-//        checkEmailDuplicate(user);
         user = userRepository.save(user);
         log.info("Добавлен новый пользователь: {}", user);
         return userMapper.toUserDto(user);
