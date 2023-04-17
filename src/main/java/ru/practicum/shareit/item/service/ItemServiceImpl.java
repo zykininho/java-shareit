@@ -4,6 +4,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ru.practicum.shareit.booking.mapper.BookingMapper;
+import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.booking.repo.BookingRepository;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.item.mapper.ItemMapper;
@@ -14,6 +17,7 @@ import ru.practicum.shareit.user.mapper.UserMapper;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserService;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -30,6 +34,9 @@ public class ItemServiceImpl implements ItemService {
     private ItemMapper itemMapper;
     @Autowired
     private UserMapper userMapper;
+    private final BookingRepository bookingRepository;
+    @Autowired
+    private BookingMapper bookingMapper;
 
     @Override
     public ItemDto addNewItem(long userId, ItemDto itemDto) {
@@ -87,20 +94,42 @@ public class ItemServiceImpl implements ItemService {
         if (itemId == 0) {
             throw new ValidationException();
         }
-        Optional<Item> item = itemRepository.findById(itemId);
-        if (item.isEmpty()) {
+        Optional<Item> optionalItem = itemRepository.findById(itemId);
+        if (optionalItem.isEmpty()) {
             throw new NotFoundException();
         }
-        return itemMapper.toItemDto(item.get());
+        Item item = optionalItem.get();
+        ItemDto itemDto = itemMapper.toItemDto(item);
+        if (item.getOwner().getId().equals(userId)) {
+            addBookings(itemDto);
+        }
+        return itemDto;
+    }
+
+    private void addBookings(ItemDto itemDto) {
+        long itemId = itemDto.getId();
+        Booking lastBooking = bookingRepository.findFirst1ByItemIdIsAndEndIsBeforeOrderByEndDesc(
+                itemId,
+                LocalDateTime.now());
+        itemDto.setLastBooking(bookingMapper.toBookingForItemDto(lastBooking));
+        Booking nextBooking = bookingRepository.findFirst1ByItemIdIsAndStartIsAfterOrderByStartAsc(
+                itemId,
+                LocalDateTime.now());
+        itemDto.setNextBooking(bookingMapper.toBookingForItemDto(nextBooking));
     }
 
     @Override
     public List<ItemDto> getOwnerItems(long userId) {
         List<Item> ownerItems = itemRepository.findAllByOwnerId(userId);
-        return ownerItems
-                .stream()
-                .map(itemMapper::toItemDto)
-                .collect(Collectors.toList());
+        List<ItemDto> listItemDto = new ArrayList<>();
+        for (Item item : ownerItems) {
+            ItemDto itemDto = itemMapper.toItemDto(item);
+            if (item.getOwner().getId().equals(userId)) {
+                addBookings(itemDto);
+            }
+            listItemDto.add(itemDto);
+        }
+        return listItemDto;
     }
 
     @Override
