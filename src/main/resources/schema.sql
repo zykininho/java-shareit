@@ -25,6 +25,7 @@ CREATE TABLE IF NOT EXISTS comments (
   text VARCHAR(512),
   item_id BIGINT REFERENCES items(id),
   author_id BIGINT REFERENCES users(id),
+  created_date TIMESTAMP WITHOUT TIME ZONE,
   CONSTRAINT pk_comment PRIMARY KEY (id)
 );
 CREATE TABLE IF NOT EXISTS bookings (

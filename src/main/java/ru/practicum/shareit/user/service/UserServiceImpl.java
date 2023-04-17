@@ -52,20 +52,6 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    private void checkEmailDuplicate(User user) {
-        String email = user.getEmail();
-        List<User> users = getAll().stream().map(userMapper::toUser).collect(Collectors.toList());
-        for (User userToCheck : users) {
-            if (userToCheck.getEmail().equals(email)) {
-                log.info("В системе уже есть пользователь c id {} с такой же почтой {}",
-                        userToCheck.getId(),
-                        userToCheck.getEmail());
-                throw new ConflictException();
-            }
-        }
-    }
-
-
     public UserDto update(long userId, UserDto userDto) {
         User user = findUser(userId);
         if (userDto.getName() != null) {

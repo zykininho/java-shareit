@@ -27,6 +27,7 @@ public class Comment {
     @ManyToOne(fetch = FetchType.LAZY)
     private User author;
 
+    @Column(name = "created_date")
     private LocalDateTime created;
 
 }

@@ -4,6 +4,8 @@ import lombok.Builder;
 import lombok.Data;
 import ru.practicum.shareit.booking.dto.BookingForItemDto;
 
+import java.util.List;
+
 @Data
 @Builder
 public class ItemDto {
@@ -14,5 +16,6 @@ public class ItemDto {
     private Boolean available;
     private BookingForItemDto lastBooking;
     private BookingForItemDto nextBooking;
+    private List<CommentDto> comments;
 
 }

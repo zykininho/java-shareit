@@ -16,14 +16,12 @@ import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.mapper.ItemMapper;
-import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.mapper.UserMapper;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserService;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,14 +34,16 @@ import java.util.stream.Collectors;
 public class BookingServiceImpl implements BookingService {
 
     private final BookingRepository bookingRepository;
+
+    private final ItemService itemService;
+    private final UserService userService;
     @Autowired
+
     private BookingMapper bookingMapper;
     @Autowired
     private ItemMapper itemMapper;
     @Autowired
     private UserMapper userMapper;
-    private final UserService userService;
-    private final ItemService itemService;
 
     @Override
     public BookingDto addNewBooking(long userId, BookingFromUserDto bookingFromUser) {
@@ -185,38 +185,38 @@ public class BookingServiceImpl implements BookingService {
         List<Booking> bookings = new ArrayList<>();
         switch (status) {
             case ALL:
-                bookings = bookingRepository.findAllByBooker(user, Sort.by("start").descending());
+                bookings = bookingRepository.findAllByBooker(user, Sort.by("end").descending());
                 break;
             case CURRENT:
                 bookings = bookingRepository.findByBookerAndStartIsBeforeAndEndIsAfter(
                         user,
                         LocalDateTime.now(),
                         LocalDateTime.now(),
-                        Sort.by("start").descending());
+                        Sort.by("end").descending());
                 break;
             case PAST:
                 bookings = bookingRepository.findByBookerAndEndIsBefore(
                         user,
                         LocalDateTime.now(),
-                        Sort.by("start").descending());
+                        Sort.by("end").descending());
                 break;
             case FUTURE:
                 bookings = bookingRepository.findByBookerAndStartIsAfter(
                         user,
                         LocalDateTime.now(),
-                        Sort.by("start").descending());
+                        Sort.by("end").descending());
                 break;
             case WAITING:
                 bookings = bookingRepository.findByBookerAndStatusIs(
                         user,
                         BookingStatus.WAITING,
-                        Sort.by("start").descending());
+                        Sort.by("end").descending());
                 break;
             case REJECTED:
                 bookings = bookingRepository.findByBookerAndStatusIs(
                         user,
                         BookingStatus.REJECTED,
-                        Sort.by("start").descending());
+                        Sort.by("end").descending());
                 break;
         }
         return bookings.stream()
@@ -236,38 +236,38 @@ public class BookingServiceImpl implements BookingService {
         List<Booking> bookings = new ArrayList<>();
         switch (status) {
             case ALL:
-                bookings = bookingRepository.findAllByItemOwnerIs(user, Sort.by("start").descending());
+                bookings = bookingRepository.findAllByItemOwnerIs(user, Sort.by("end").descending());
                 break;
             case CURRENT:
                 bookings = bookingRepository.findByItemOwnerAndStartIsBeforeAndEndIsAfter(
                         user,
                         LocalDateTime.now(),
                         LocalDateTime.now(),
-                        Sort.by("start").descending());
+                        Sort.by("end").descending());
                 break;
             case PAST:
                 bookings = bookingRepository.findByItemOwnerAndEndIsBefore(
                         user,
                         LocalDateTime.now(),
-                        Sort.by("start").descending());
+                        Sort.by("end").descending());
                 break;
             case FUTURE:
                 bookings = bookingRepository.findByItemOwnerAndStartIsAfter(
                         user,
                         LocalDateTime.now(),
-                        Sort.by("start").descending());
+                        Sort.by("end").descending());
                 break;
             case WAITING:
                 bookings = bookingRepository.findByItemOwnerAndStatusIs(
                         user,
                         BookingStatus.WAITING,
-                        Sort.by("start").descending());
+                        Sort.by("end").descending());
                 break;
             case REJECTED:
                 bookings = bookingRepository.findByItemOwnerAndStatusIs(
                         user,
                         BookingStatus.REJECTED,
-                        Sort.by("start").descending());
+                        Sort.by("end").descending());
                 break;
         }
         return bookings.stream()
