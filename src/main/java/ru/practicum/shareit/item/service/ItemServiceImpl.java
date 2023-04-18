@@ -118,16 +118,16 @@ public class ItemServiceImpl implements ItemService {
 
     private void addBookings(ItemDto itemDto) {
         long itemId = itemDto.getId();
-        Booking lastBooking = bookingRepository.findFirst1ByItemIdIsAndStartIsBeforeAndStatusIsOrderByEndDesc(
+        Optional<Booking> lastBooking = bookingRepository.findFirst1ByItemIdIsAndStartIsBeforeAndStatusIsOrderByEndDesc(
                 itemId,
                 LocalDateTime.now(),
                 BookingStatus.APPROVED);
-        itemDto.setLastBooking(bookingMapper.toBookingForItemDto(lastBooking));
-        Booking nextBooking = bookingRepository.findFirst1ByItemIdIsAndStartIsAfterAndStatusIsOrderByStartAsc(
+        itemDto.setLastBooking(bookingMapper.toBookingForItemDto(lastBooking.orElse(null)));
+        Optional<Booking> nextBooking = bookingRepository.findFirst1ByItemIdIsAndStartIsAfterAndStatusIsOrderByStartAsc(
                 itemId,
                 LocalDateTime.now(),
                 BookingStatus.APPROVED);
-        itemDto.setNextBooking(bookingMapper.toBookingForItemDto(nextBooking));
+        itemDto.setNextBooking(bookingMapper.toBookingForItemDto(nextBooking.orElse(null)));
     }
 
     private void addComments(ItemDto itemDto) {
@@ -181,8 +181,8 @@ public class ItemServiceImpl implements ItemService {
     public CommentDto addComment(long userId, long itemId, CommentDto commentDto) {
         User author = userMapper.toUser(userService.getUser(userId));
         Item item = findItem(itemId);
-        Booking booking = bookingRepository.findFirst1ByItemIdAndBookerIdAndEndIsBefore(itemId, userId, LocalDateTime.now());
-        if (booking == null) {
+        Optional<Booking> booking = bookingRepository.findFirst1ByItemIdAndBookerIdAndEndIsBefore(itemId, userId, LocalDateTime.now());
+        if (booking.isEmpty()) {
             log.info("Пользователь с id={} не может добавить отзыв к товару с id={}, он не бронировал его",
                     userId, itemId);
             throw new ValidationException();
