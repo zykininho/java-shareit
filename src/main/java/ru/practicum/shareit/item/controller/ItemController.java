@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.service.ItemService;
 
@@ -18,14 +19,14 @@ public class ItemController {
     private final ItemService itemService;
 
     @PostMapping
-    public ResponseEntity<ItemDto> add(@RequestHeader(value = "X-Sharer-User-Id", defaultValue = "0") long userId,
+    public ResponseEntity<ItemDto> add(@RequestHeader(value = "X-Sharer-User-Id") long userId,
                        @RequestBody ItemDto itemDto) {
         log.info("Received POST-request at /items endpoint from user id={}", userId);
         return ResponseEntity.ok().body(itemService.addNewItem(userId, itemDto));
     }
 
     @PatchMapping("/{itemId}")
-    public ResponseEntity<ItemDto> add(@RequestHeader(value = "X-Sharer-User-Id", defaultValue = "0") long userId,
+    public ResponseEntity<ItemDto> update(@RequestHeader(value = "X-Sharer-User-Id") long userId,
                        @PathVariable long itemId,
                        @RequestBody ItemDto itemDto) {
         log.info("Received PATCH-request at /items/{} endpoint from user id={}", itemId, userId);
@@ -40,7 +41,7 @@ public class ItemController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ItemDto>> get(@RequestHeader("X-Sharer-User-Id") long userId) {
+    public ResponseEntity<List<ItemDto>> getAll(@RequestHeader("X-Sharer-User-Id") long userId) {
         log.info("Received GET-request at /items endpoint from user id={}", userId);
         return ResponseEntity.ok().body(itemService.getOwnerItems(userId));
     }
@@ -51,4 +52,13 @@ public class ItemController {
         log.info("Received GET-request at /items/search?text={} endpoint from user id={}", text, userId);
         return ResponseEntity.ok().body(itemService.search(userId, text));
     }
+
+    @PostMapping("/{itemId}/comment")
+    public ResponseEntity<CommentDto> addComment(@RequestHeader(value = "X-Sharer-User-Id") long userId,
+                                                 @PathVariable long itemId,
+                                          @RequestBody CommentDto commentDto) {
+        log.info("Received POST-request at /items/{}/comment endpoint from user id={}", itemId, userId);
+        return ResponseEntity.ok().body(itemService.addComment(userId, itemId, commentDto));
+    }
+
 }
