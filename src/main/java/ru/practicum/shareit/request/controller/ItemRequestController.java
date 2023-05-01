@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
+import ru.practicum.shareit.request.dto.ItemRequestShortDto;
 import ru.practicum.shareit.request.service.ItemRequestService;
 
 import java.util.List;
@@ -19,9 +20,9 @@ public class ItemRequestController {
 
     @PostMapping
     public ResponseEntity<ItemRequestDto> create(@RequestHeader("X-Sharer-User-Id") long userId,
-                                                 @RequestBody ItemRequestDto itemRequestDto) {
-        log.info("Received POST-request at /requests endpoint from user id={} with request body: {}", userId, itemRequestDto);
-        return ResponseEntity.ok().body(itemRequestService.create(userId, itemRequestDto));
+                                                 @RequestBody ItemRequestShortDto itemRequestShortDto) {
+        log.info("Received POST-request at /requests endpoint from user id={} with request body: {}", userId, itemRequestShortDto);
+        return ResponseEntity.ok().body(itemRequestService.create(userId, itemRequestShortDto));
     }
 
     @GetMapping

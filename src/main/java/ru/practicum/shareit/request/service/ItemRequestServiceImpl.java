@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
+import ru.practicum.shareit.request.dto.ItemRequestShortDto;
 
 import java.util.List;
 
@@ -13,7 +14,7 @@ import java.util.List;
 public class ItemRequestServiceImpl implements ItemRequestService {
 
     @Override
-    public ItemRequestDto create(long userId, ItemRequestDto itemRequestDto) {
+    public ItemRequestDto create(long userId, ItemRequestShortDto itemRequestShortDto) {
         return null;
     }
 
