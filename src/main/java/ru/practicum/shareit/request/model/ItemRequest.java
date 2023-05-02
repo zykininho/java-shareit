@@ -21,6 +21,10 @@ public class ItemRequest {
     @Column
     private String description;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @ToString.Exclude
+    private User requestor;
+
     @Column(name = "created_date")
     private LocalDateTime created;
 

@@ -40,8 +40,8 @@ public class ItemRequestController {
 
     @GetMapping("/all")
     public ResponseEntity<List<ItemRequestDto>> search(@RequestHeader("X-Sharer-User-Id") long userId,
-                                                       @RequestParam String from,
-                                                       @RequestParam String size) {
+                                                       @RequestParam(required = false) Integer from,
+                                                       @RequestParam(required = false) Integer size) {
         log.info("Received GET-request at /requests/all?from={}&size={} endpoint from user id={}", from, size, userId);
         return ResponseEntity.ok().body(itemRequestService.search(userId, from, size));
     }
