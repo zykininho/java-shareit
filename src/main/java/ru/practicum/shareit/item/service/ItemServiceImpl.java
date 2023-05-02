@@ -3,6 +3,8 @@ package ru.practicum.shareit.item.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.mapper.BookingMapper;
 import ru.practicum.shareit.booking.model.Booking;
@@ -149,8 +151,14 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<ItemDto> getOwnerItems(long userId) {
-        List<Item> ownerItems = itemRepository.findAllByOwnerId(userId);
+    public List<ItemDto> getOwnerItems(long userId, Integer from, Integer size) {
+        List<Item> ownerItems;
+        if (from != null && size != null) {
+            validateSearchParameters(from, size);
+            ownerItems = itemRepository.findAllByOwnerId(userId, PageRequest.of(from / size, size));
+        } else {
+            ownerItems = itemRepository.findAllByOwnerId(userId);
+        }
         List<ItemDto> listItemDto = new ArrayList<>();
         for (Item item : ownerItems) {
             ItemDto itemDto = itemMapper.toItemDto(item);
@@ -164,11 +172,17 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<ItemDto> search(long userId, String text) {
+    public List<ItemDto> search(long userId, String text, Integer from, Integer size) {
         if (text.isBlank()) {
             return new ArrayList<>();
         }
-        List<Item> foundItems = itemRepository.search(text);
+        List<Item> foundItems;
+        if (from != null && size != null) {
+            validateSearchParameters(from, size);
+            foundItems = itemRepository.search(text, PageRequest.of(from / size, size));
+        } else {
+            foundItems = itemRepository.search(text);
+        }
         return foundItems
                 .stream()
                 .map(itemMapper::toItemDto)
@@ -215,4 +229,15 @@ public class ItemServiceImpl implements ItemService {
                 itemId);
         return commentMapper.toCommentDto(savedComment);
     }
+
+    private void validateSearchParameters(int from, int size) {
+        if (from < 0) {
+            log.info("Параметр запроса 'from' должен быть больше или равен 0, указано значение {}", from);
+            throw new ValidationException();
+        } else if (size <= 0) {
+            log.info("Параметр запроса 'size' должен быть больше 0, указано значение {}", size);
+            throw new ValidationException();
+        }
+    }
+
 }

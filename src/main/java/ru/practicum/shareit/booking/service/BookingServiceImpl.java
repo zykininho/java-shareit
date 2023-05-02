@@ -3,6 +3,7 @@ package ru.practicum.shareit.booking.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.dto.BookingDto;
@@ -174,7 +175,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<BookingDto> getUserBookings(long userId, String state) {
+    public List<BookingDto> getUserBookings(long userId, String state, Integer from, Integer size) {
         User user = userMapper.toUser(userService.getUser(userId));
         BookingState status;
         try {
@@ -185,38 +186,86 @@ public class BookingServiceImpl implements BookingService {
         List<Booking> bookings = new ArrayList<>();
         switch (status) {
             case ALL:
-                bookings = bookingRepository.findAllByBooker(user, Sort.by("end").descending());
+                if (from != null && size != null) {
+                    validateSearchParameters(from, size);
+                    bookings = bookingRepository.findAllByBooker(user,
+                            PageRequest.of(from / size, size, Sort.by("end").descending()));
+                } else {
+                    bookings = bookingRepository.findAllByBooker(user,
+                            Sort.by("end").descending());
+                }
                 break;
             case CURRENT:
-                bookings = bookingRepository.findByBookerAndStartIsBeforeAndEndIsAfter(
-                        user,
-                        LocalDateTime.now(),
-                        LocalDateTime.now(),
-                        Sort.by("end").descending());
+                if (from != null && size != null) {
+                    validateSearchParameters(from, size);
+                    bookings = bookingRepository.findByBookerAndStartIsBeforeAndEndIsAfter(
+                            user,
+                            LocalDateTime.now(),
+                            LocalDateTime.now(),
+                            PageRequest.of(from / size, size, Sort.by("end").descending()));
+                } else {
+                    bookings = bookingRepository.findByBookerAndStartIsBeforeAndEndIsAfter(
+                            user,
+                            LocalDateTime.now(),
+                            LocalDateTime.now(),
+                            Sort.by("end").descending());
+                }
                 break;
             case PAST:
-                bookings = bookingRepository.findByBookerAndEndIsBefore(
-                        user,
-                        LocalDateTime.now(),
-                        Sort.by("end").descending());
+                if (from != null && size != null) {
+                    validateSearchParameters(from, size);
+                    bookings = bookingRepository.findByBookerAndEndIsBefore(
+                            user,
+                            LocalDateTime.now(),
+                            PageRequest.of(from / size, size, Sort.by("end").descending()));
+                } else {
+                    bookings = bookingRepository.findByBookerAndEndIsBefore(
+                            user,
+                            LocalDateTime.now(),
+                            Sort.by("end").descending());
+                }
                 break;
             case FUTURE:
-                bookings = bookingRepository.findByBookerAndStartIsAfter(
-                        user,
-                        LocalDateTime.now(),
-                        Sort.by("end").descending());
+                if (from != null && size != null) {
+                    validateSearchParameters(from, size);
+                    bookings = bookingRepository.findByBookerAndStartIsAfter(
+                            user,
+                            LocalDateTime.now(),
+                            PageRequest.of(from / size, size, Sort.by("end").descending()));
+                } else {
+                    bookings = bookingRepository.findByBookerAndStartIsAfter(
+                            user,
+                            LocalDateTime.now(),
+                            Sort.by("end").descending());
+                }
                 break;
             case WAITING:
-                bookings = bookingRepository.findByBookerAndStatusIs(
-                        user,
-                        BookingStatus.WAITING,
-                        Sort.by("end").descending());
+                if (from != null && size != null) {
+                    validateSearchParameters(from, size);
+                    bookings = bookingRepository.findByBookerAndStatusIs(
+                            user,
+                            BookingStatus.WAITING,
+                            PageRequest.of(from / size, size, Sort.by("end").descending()));
+                } else {
+                    bookings = bookingRepository.findByBookerAndStatusIs(
+                            user,
+                            BookingStatus.WAITING,
+                            Sort.by("end").descending());
+                }
                 break;
             case REJECTED:
-                bookings = bookingRepository.findByBookerAndStatusIs(
-                        user,
-                        BookingStatus.REJECTED,
-                        Sort.by("end").descending());
+                if (from != null && size != null) {
+                    validateSearchParameters(from, size);
+                    bookings = bookingRepository.findByBookerAndStatusIs(
+                            user,
+                            BookingStatus.REJECTED,
+                            PageRequest.of(from / size, size, Sort.by("end").descending()));
+                } else {
+                    bookings = bookingRepository.findByBookerAndStatusIs(
+                            user,
+                            BookingStatus.REJECTED,
+                            Sort.by("end").descending());
+                }
                 break;
         }
         return bookings.stream()
@@ -225,7 +274,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<BookingDto> getItemsOwnerBookings(long userId, String state) {
+    public List<BookingDto> getItemsOwnerBookings(long userId, String state, Integer from, Integer size) {
         User user = userMapper.toUser(userService.getUser(userId));
         BookingState status;
         try {
@@ -236,43 +285,101 @@ public class BookingServiceImpl implements BookingService {
         List<Booking> bookings = new ArrayList<>();
         switch (status) {
             case ALL:
-                bookings = bookingRepository.findAllByItemOwnerIs(user, Sort.by("end").descending());
+                if (from != null && size != null) {
+                    validateSearchParameters(from, size);
+                    bookings = bookingRepository.findAllByItemOwnerIs(user,
+                            PageRequest.of(from / size, size, Sort.by("end").descending()));
+                } else {
+                    bookings = bookingRepository.findAllByItemOwnerIs(user,
+                            Sort.by("end").descending());
+                }
                 break;
             case CURRENT:
-                bookings = bookingRepository.findByItemOwnerAndStartIsBeforeAndEndIsAfter(
-                        user,
-                        LocalDateTime.now(),
-                        LocalDateTime.now(),
-                        Sort.by("end").descending());
+                if (from != null && size != null) {
+                    validateSearchParameters(from, size);
+                    bookings = bookingRepository.findByItemOwnerAndStartIsBeforeAndEndIsAfter(
+                            user,
+                            LocalDateTime.now(),
+                            LocalDateTime.now(),
+                            PageRequest.of(from / size, size, Sort.by("end").descending()));
+                } else {
+                    bookings = bookingRepository.findByItemOwnerAndStartIsBeforeAndEndIsAfter(
+                            user,
+                            LocalDateTime.now(),
+                            LocalDateTime.now(),
+                            Sort.by("end").descending());
+                }
                 break;
             case PAST:
-                bookings = bookingRepository.findByItemOwnerAndEndIsBefore(
-                        user,
-                        LocalDateTime.now(),
-                        Sort.by("end").descending());
+                if (from != null && size != null) {
+                    validateSearchParameters(from, size);
+                    bookings = bookingRepository.findByItemOwnerAndEndIsBefore(
+                            user,
+                            LocalDateTime.now(),
+                            PageRequest.of(from / size, size, Sort.by("end").descending()));
+                } else {
+                    bookings = bookingRepository.findByItemOwnerAndEndIsBefore(
+                            user,
+                            LocalDateTime.now(),
+                            Sort.by("end").descending());
+                }
                 break;
             case FUTURE:
-                bookings = bookingRepository.findByItemOwnerAndStartIsAfter(
-                        user,
-                        LocalDateTime.now(),
-                        Sort.by("end").descending());
+                if (from != null && size != null) {
+                    validateSearchParameters(from, size);
+                    bookings = bookingRepository.findByItemOwnerAndStartIsAfter(
+                            user,
+                            LocalDateTime.now(),
+                            PageRequest.of(from / size, size, Sort.by("end").descending()));
+                } else {
+                    bookings = bookingRepository.findByItemOwnerAndStartIsAfter(
+                            user,
+                            LocalDateTime.now(),
+                            Sort.by("end").descending());
+                }
                 break;
             case WAITING:
-                bookings = bookingRepository.findByItemOwnerAndStatusIs(
-                        user,
-                        BookingStatus.WAITING,
-                        Sort.by("end").descending());
+                if (from != null && size != null) {
+                    validateSearchParameters(from, size);
+                    bookings = bookingRepository.findByItemOwnerAndStatusIs(
+                            user,
+                            BookingStatus.WAITING,
+                            PageRequest.of(from / size, size, Sort.by("end").descending()));
+                } else {
+                    bookings = bookingRepository.findByItemOwnerAndStatusIs(
+                            user,
+                            BookingStatus.WAITING,
+                            Sort.by("end").descending());
+                }
                 break;
             case REJECTED:
-                bookings = bookingRepository.findByItemOwnerAndStatusIs(
-                        user,
-                        BookingStatus.REJECTED,
-                        Sort.by("end").descending());
+                if (from != null && size != null) {
+                    validateSearchParameters(from, size);
+                    bookings = bookingRepository.findByItemOwnerAndStatusIs(
+                            user,
+                            BookingStatus.REJECTED,
+                            PageRequest.of(from / size, size, Sort.by("end").descending()));
+                } else {
+                    bookings = bookingRepository.findByItemOwnerAndStatusIs(
+                            user,
+                            BookingStatus.REJECTED,
+                            Sort.by("end").descending());
+                }
                 break;
         }
         return bookings.stream()
                 .map(bookingMapper::toBookingDto)
                 .collect(Collectors.toList());
+    }
+
+    private void validateSearchParameters(int from, int size) {
+        if (from < 0) {
+            log.info("Параметр запроса 'from' должен быть больше или равен 0, указано значение {}", from);
+            throw new ValidationException();
+        } else if (size <= 0) {
+            log.info("Параметр запроса 'size' должен быть больше 0, указано значение {}", size);
+            throw new ValidationException();
+        }
     }
 
 }

@@ -91,7 +91,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
         if (from != null && size != null) {
             validateSearchParameters(from, size);
             itemRequests = itemRequestRepository.findAllByOtherRequestors(owner.getId(),
-                    PageRequest.of(from, size, Sort.by("created").descending()));
+                    PageRequest.of(from / size, size, Sort.by("created").descending()));
         } else {
             itemRequests = itemRequestRepository.findAllByOtherRequestors(owner.getId(),
                     Sort.by("created").descending());

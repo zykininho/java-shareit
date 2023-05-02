@@ -42,16 +42,22 @@ public class BookingController {
 
     @GetMapping
     public ResponseEntity<List<BookingDto>> getUserBookings(@RequestHeader(value = "X-Sharer-User-Id") long userId,
-                                                            @RequestParam(defaultValue = "ALL") String state) {
-        log.info("Received GET-request at /bookings?state={} endpoint from user id={}", state, userId);
-        return ResponseEntity.ok().body(bookingService.getUserBookings(userId, state));
+                                                            @RequestParam(defaultValue = "ALL") String state,
+                                                            @RequestParam(required = false) Integer from,
+                                                            @RequestParam(required = false) Integer size) {
+        log.info("Received GET-request at /bookings?state={}&from={}&size={} endpoint from user id={}",
+                state, from, size, userId);
+        return ResponseEntity.ok().body(bookingService.getUserBookings(userId, state, from, size));
     }
 
     @GetMapping("/owner")
     public ResponseEntity<List<BookingDto>> getItemsOwnerBookings(@RequestHeader(value = "X-Sharer-User-Id") long userId,
-                                                            @RequestParam(defaultValue = "ALL") String state) {
-        log.info("Received GET-request at /bookings/owner?state={} endpoint from user id={}", state, userId);
-        return ResponseEntity.ok().body(bookingService.getItemsOwnerBookings(userId, state));
+                                                                  @RequestParam(defaultValue = "ALL") String state,
+                                                                  @RequestParam(required = false) Integer from,
+                                                                  @RequestParam(required = false) Integer size) {
+        log.info("Received GET-request at /bookings/owner?state={}&from={}&size={} endpoint from user id={}",
+                state, from, size, userId);
+        return ResponseEntity.ok().body(bookingService.getItemsOwnerBookings(userId, state, from, size));
     }
 
 }
