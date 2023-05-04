@@ -235,9 +235,11 @@ public class ItemServiceImplTest {
         Item savedAnotherItem = itemMapper.toItem(itemService.addNewItem(user.getId(), anotherItemDto));
         assertEquals(anotherItem, savedAnotherItem);
 
-        when(itemRepository.findAllByOwnerId(anyLong())).thenReturn(items);
+        int from = 1;
+        int size = 10;
+        when(itemRepository.findAllByOwnerId(anyLong(), eq(PageRequest.of(from / size, size)))).thenReturn(items);
 
-        List<ItemDto> ownerItems = itemService.getOwnerItems(user.getId(), 1, 10);
+        List<ItemDto> ownerItems = itemService.getOwnerItems(user.getId(), from, size);
         assertEquals(itemsDto, ownerItems);
     }
 
@@ -278,8 +280,10 @@ public class ItemServiceImplTest {
         when(itemRepository.search(anyString(), eq(PageRequest.of(from / size, size)))).thenReturn(items);
 
         String text = "item";
-        List<ItemDto> ownerItems = itemService.search(user.getId(), text, from, size);
-        assertEquals(itemsDto, ownerItems);
+        List<ItemDto> ownerItemsDto = itemService.search(user.getId(), text, from, size);
+        ArrayList<CommentDto> commentsDto = new ArrayList<>();
+        ownerItemsDto.forEach(itemDto -> itemDto.setComments(commentsDto));
+        assertEquals(itemsDto, ownerItemsDto);
     }
 
     @Test

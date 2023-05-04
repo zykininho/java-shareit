@@ -167,6 +167,14 @@
 						<output>file</output>
 					</configuration>
 					<executions>
+						 <!--Zykin-->
+						<execution>
+							<id>default-prepare-agent</id>
+							<goals>
+								<goal>prepare-agent</goal>
+							</goals>
+						</execution>
+						<!--Zykin-->
 						<execution>
 							<id>jacoco-initialize</id>
 							<goals>
