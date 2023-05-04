@@ -27,6 +27,10 @@ import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repo.CommentRepository;
 import ru.practicum.shareit.item.repo.ItemRepository;
+import ru.practicum.shareit.request.dto.ItemRequestDto;
+import ru.practicum.shareit.request.mapper.ItemRequestMapper;
+import ru.practicum.shareit.request.model.ItemRequest;
+import ru.practicum.shareit.request.repo.ItemRequestRepository;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repo.UserRepository;
 
@@ -64,6 +68,9 @@ public class ItemServiceImplTest {
     @MockBean
     CommentRepository commentRepository;
 
+    @MockBean
+    ItemRequestRepository itemRequestRepository;
+
     @Autowired
     ItemMapper itemMapper;
 
@@ -72,6 +79,9 @@ public class ItemServiceImplTest {
 
     @Autowired
     BookingMapper bookingMapper;
+
+    @Autowired
+    ItemRequestMapper requestMapper;
 
     private static User user;
     private static User anotherUser;
@@ -85,6 +95,8 @@ public class ItemServiceImplTest {
     private static BookingFromUserDto bookingByAnotherUserDto;
     private static Comment comment;
     private static CommentDto commentDto;
+    private static ItemRequest request;
+    private static ItemRequestDto requestDto;
 
     @BeforeEach
     void setUp() {
@@ -145,6 +157,14 @@ public class ItemServiceImplTest {
                 .created(LocalDateTime.of(2023, 5, 5, 15, 0, 0))
                 .build();
         commentDto = commentMapper.toCommentDto(comment);
+
+        request = ItemRequest.builder()
+                .id(1L)
+                .description("Request 1")
+                .created(LocalDateTime.of(2023, 5, 5, 12, 0, 0))
+                .requestor(anotherUser)
+                .build();
+        requestDto = requestMapper.toItemRequestDto(request);
     }
 
     @Test
@@ -158,6 +178,45 @@ public class ItemServiceImplTest {
         when(itemRepository.save(anotherItem)).thenReturn(anotherItem);
         Item savedAnotherItem = itemMapper.toItem(itemService.addNewItem(user.getId(), anotherItemDto));
         assertEquals(anotherItem, savedAnotherItem);
+    }
+
+    @Test
+    void saveNewItemNoName() {
+        when(userRepository.findById(anyLong())).thenReturn(Optional.ofNullable(user));
+
+        when(itemRepository.save(item)).thenReturn(item);
+        itemDto.setName(null);
+
+        Throwable thrown = catchThrowable(() -> {
+            itemService.addNewItem(user.getId(), itemDto);
+        });
+        assertThat(thrown).isInstanceOf(ValidationException.class);
+    }
+
+    @Test
+    void saveNewItemNoDescription() {
+        when(userRepository.findById(anyLong())).thenReturn(Optional.ofNullable(user));
+
+        when(itemRepository.save(item)).thenReturn(item);
+        itemDto.setDescription(null);
+
+        Throwable thrown = catchThrowable(() -> {
+            itemService.addNewItem(user.getId(), itemDto);
+        });
+        assertThat(thrown).isInstanceOf(ValidationException.class);
+    }
+
+    @Test
+    void saveNewItemNoAvailable() {
+        when(userRepository.findById(anyLong())).thenReturn(Optional.ofNullable(user));
+
+        when(itemRepository.save(item)).thenReturn(item);
+        itemDto.setAvailable(null);
+
+        Throwable thrown = catchThrowable(() -> {
+            itemService.addNewItem(user.getId(), itemDto);
+        });
+        assertThat(thrown).isInstanceOf(ValidationException.class);
     }
 
     @Test
@@ -176,6 +235,42 @@ public class ItemServiceImplTest {
         when(itemRepository.findById(item.getId())).thenReturn(Optional.ofNullable(item));
         ItemDto updatedItemDto = itemService.updateItem(user.getId(), item.getId(), itemDto);
         assertEquals(itemDto, updatedItemDto);
+    }
+
+    @Test
+    void saveNewItemsAndUpdateWithNoChanges() {
+        when(userRepository.findById(anyLong())).thenReturn(Optional.ofNullable(user));
+
+        when(itemRepository.save(item)).thenReturn(item);
+        Item savedItem = itemMapper.toItem(itemService.addNewItem(user.getId(), itemDto));
+        assertEquals(item, savedItem);
+
+        itemDto = itemMapper.toItemDto(item);
+
+        when(itemRepository.findById(item.getId())).thenReturn(Optional.ofNullable(item));
+        ItemDto updatedItemDto = itemService.updateItem(user.getId(), item.getId(), itemDto);
+        assertEquals(itemDto, updatedItemDto);
+    }
+
+    @Test
+    void saveNewItemsAndTryUpdateWrongId() {
+        when(userRepository.findById(anyLong())).thenReturn(Optional.ofNullable(user));
+
+        when(itemRepository.save(item)).thenReturn(item);
+        Item savedItem = itemMapper.toItem(itemService.addNewItem(user.getId(), itemDto));
+        assertEquals(item, savedItem);
+
+        item.setName("New item 1");
+        item.setDescription("New description of item 1");
+        item.setAvailable(true);
+        itemDto = itemMapper.toItemDto(item);
+
+        when(itemRepository.findById(item.getId())).thenReturn(Optional.empty());
+
+        Throwable thrown = catchThrowable(() -> {
+            itemService.updateItem(user.getId(), item.getId()   , itemDto);
+        });
+        assertThat(thrown).isInstanceOf(NotFoundException.class);
     }
 
     @Test
@@ -235,9 +330,9 @@ public class ItemServiceImplTest {
         Item savedAnotherItem = itemMapper.toItem(itemService.addNewItem(user.getId(), anotherItemDto));
         assertEquals(anotherItem, savedAnotherItem);
 
-        int from = 1;
-        int size = 10;
-        when(itemRepository.findAllByOwnerId(anyLong(), eq(PageRequest.of(from / size, size)))).thenReturn(items);
+        Integer from = null;
+        Integer size = null;
+        when(itemRepository.findAllByOwnerId(anyLong())).thenReturn(items);
 
         List<ItemDto> ownerItems = itemService.getOwnerItems(user.getId(), from, size);
         assertEquals(itemsDto, ownerItems);
@@ -257,10 +352,54 @@ public class ItemServiceImplTest {
 
         int from = 1;
         int size = 10;
-        when(itemRepository.findAllByOwnerId(anyLong(), eq(PageRequest.of(from / size, size)))).thenReturn(items);
+        when(itemRepository.findAllByOwnerId(anyLong(), any())).thenReturn(items);
 
         List<ItemDto> ownerItems = itemService.getOwnerItems(user.getId(), from, size);
         assertEquals(itemsDto, ownerItems);
+    }
+
+    @Test
+    void saveNewItemsAndGetAllWithPaginationWrongFrom() {
+        when(userRepository.findById(anyLong())).thenReturn(Optional.ofNullable(user));
+
+        when(itemRepository.save(item)).thenReturn(item);
+        Item savedItem = itemMapper.toItem(itemService.addNewItem(user.getId(), itemDto));
+        assertEquals(item, savedItem);
+
+        when(itemRepository.save(anotherItem)).thenReturn(anotherItem);
+        Item savedAnotherItem = itemMapper.toItem(itemService.addNewItem(user.getId(), anotherItemDto));
+        assertEquals(anotherItem, savedAnotherItem);
+
+        Integer from = -1;
+        Integer size = 10;
+        when(itemRepository.findAllByOwnerId(anyLong(), any())).thenReturn(items);
+
+        Throwable thrown = catchThrowable(() -> {
+            itemService.getOwnerItems(user.getId(), from, size);
+        });
+        assertThat(thrown).isInstanceOf(ValidationException.class);
+    }
+
+    @Test
+    void saveNewItemsAndGetAllWithPaginationWrongSize() {
+        when(userRepository.findById(anyLong())).thenReturn(Optional.ofNullable(user));
+
+        when(itemRepository.save(item)).thenReturn(item);
+        Item savedItem = itemMapper.toItem(itemService.addNewItem(user.getId(), itemDto));
+        assertEquals(item, savedItem);
+
+        when(itemRepository.save(anotherItem)).thenReturn(anotherItem);
+        Item savedAnotherItem = itemMapper.toItem(itemService.addNewItem(user.getId(), anotherItemDto));
+        assertEquals(anotherItem, savedAnotherItem);
+
+        Integer from = 1;
+        Integer size = -10;
+        when(itemRepository.findAllByOwnerId(anyLong(), any())).thenReturn(items);
+
+        Throwable thrown = catchThrowable(() -> {
+            itemService.getOwnerItems(user.getId(), from, size);
+        });
+        assertThat(thrown).isInstanceOf(ValidationException.class);
     }
 
     @Test
@@ -422,6 +561,62 @@ public class ItemServiceImplTest {
             itemService.addComment(anotherUser.getId(), item.getId(), commentDto);
         });
         assertThat(thrown).isInstanceOf(ValidationException.class);
+    }
+
+    @Test
+    void findItemById() {
+        when(userRepository.findById(anyLong())).thenReturn(Optional.ofNullable(user));
+
+        when(itemRepository.save(item)).thenReturn(item);
+        Item savedItem = itemMapper.toItem(itemService.addNewItem(user.getId(), itemDto));
+        assertEquals(item, savedItem);
+
+        when(itemRepository.findById(item.getId())).thenReturn(Optional.ofNullable(item));
+        Item foundItem = itemService.findItem(item.getId());
+        assertEquals(item, foundItem);
+    }
+
+    @Test
+    void findItemByNoId() {
+        when(userRepository.findById(anyLong())).thenReturn(Optional.ofNullable(user));
+
+        when(itemRepository.save(item)).thenReturn(item);
+        Item savedItem = itemMapper.toItem(itemService.addNewItem(user.getId(), itemDto));
+        assertEquals(item, savedItem);
+
+        Throwable thrown = catchThrowable(() -> {
+            itemService.findItem(0);
+        });
+        assertThat(thrown).isInstanceOf(ValidationException.class);
+    }
+
+    @Test
+    void findItemByWrongId() {
+        when(userRepository.findById(anyLong())).thenReturn(Optional.ofNullable(user));
+
+        when(itemRepository.save(item)).thenReturn(item);
+        Item savedItem = itemMapper.toItem(itemService.addNewItem(user.getId(), itemDto));
+        assertEquals(item, savedItem);
+
+        when(itemRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+        Throwable thrown = catchThrowable(() -> {
+            itemService.findItem(item.getId());
+        });
+        assertThat(thrown).isInstanceOf(NotFoundException.class);
+    }
+
+    @Test
+    void saveNewItemWithRequest() {
+        when(userRepository.findById(anyLong())).thenReturn(Optional.ofNullable(user));
+
+        item.setRequest(request);
+        itemDto.setRequestId(request.getId());
+        when(itemRepository.save(item)).thenReturn(item);
+        when(itemRequestRepository.findById(anyLong())).thenReturn(Optional.ofNullable(request));
+        ItemDto savedItemDto = itemService.addNewItem(user.getId(), itemDto);
+        savedItemDto.setComments(new ArrayList<>());
+        assertEquals(itemDto, savedItemDto);
     }
 
 }

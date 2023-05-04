@@ -19,6 +19,7 @@ import ru.practicum.shareit.booking.mapper.BookingMapper;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.enums.BookingStatus;
+import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
@@ -30,6 +31,8 @@ import java.util.List;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -141,6 +144,23 @@ class BookingControllerTest {
                 .andExpect(jsonPath("$[1].item.name", is(bookingDto2.getItem().getName())))
                 .andExpect(jsonPath("$[1].booker.id", is((int) bookingDto2.getBooker().getId())))
                 .andExpect(jsonPath("$[1].status", is(bookingDto2.getStatus().name())))
+        ;
+    }
+
+    @Test
+    void getWrongUserBookings() throws Exception {
+
+        when(bookingService.getUserBookings(anyLong(), anyString(), anyInt(), anyInt())).
+                thenThrow(new NotFoundException());
+
+        mvc.perform(get("/bookings")
+                        .header("X-Sharer-User-Id", 100L)
+                        .param("state", "ALL")
+                        .param("from", "1")
+                        .param("size", "10")
+                )
+                .andExpect(status().isNotFound())
+                .andExpect(result -> assertTrue(result.getResolvedException() instanceof NotFoundException))
         ;
     }
 

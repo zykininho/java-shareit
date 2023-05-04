@@ -21,7 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ExtendWith(MockitoExtension.class)
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @JsonTest
-public class UserDtoJsonTest {
+public class UserShortDtoTest {
 
     @MockBean
     UserRepository userRepository;
@@ -39,20 +39,16 @@ public class UserDtoJsonTest {
     CommentRepository commentRepository;
 
     @Autowired
-    private JacksonTester<UserDto> json;
+    private JacksonTester<UserShortDto> json;
 
     @Test
     void testUserDto() throws Exception {
-        UserDto userDto = new UserDto(
-                1L,
-                "User",
-                "user@mail.ru"
+        UserShortDto userDto = new UserShortDto(
+                1L
         );
 
-        JsonContent<UserDto> result = json.write(userDto);
+        JsonContent<UserShortDto> result = json.write(userDto);
 
         assertThat(result).extractingJsonPathNumberValue("$.id").isEqualTo(1);
-        assertThat(result).extractingJsonPathStringValue("$.name").isEqualTo("User");
-        assertThat(result).extractingJsonPathStringValue("$.email").isEqualTo("user@mail.ru");
     }
 }

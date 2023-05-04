@@ -1,4 +1,4 @@
-package ru.practicum.shareit.user.dto;
+package ru.practicum.shareit.request.dto;
 
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
@@ -21,7 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ExtendWith(MockitoExtension.class)
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @JsonTest
-public class UserDtoJsonTest {
+public class ItemRequestShortDtoJsonTest {
 
     @MockBean
     UserRepository userRepository;
@@ -39,20 +39,19 @@ public class UserDtoJsonTest {
     CommentRepository commentRepository;
 
     @Autowired
-    private JacksonTester<UserDto> json;
+    private JacksonTester<ItemRequestShortDto> json;
 
     @Test
-    void testUserDto() throws Exception {
-        UserDto userDto = new UserDto(
-                1L,
-                "User",
-                "user@mail.ru"
-        );
+    void testItemRequestShortDto() throws Exception {
+        ItemRequestShortDto userDto = ItemRequestShortDto.builder()
+                .id(1L)
+                .description("Request")
+                .build();
 
-        JsonContent<UserDto> result = json.write(userDto);
+        JsonContent<ItemRequestShortDto> result = json.write(userDto);
 
         assertThat(result).extractingJsonPathNumberValue("$.id").isEqualTo(1);
-        assertThat(result).extractingJsonPathStringValue("$.name").isEqualTo("User");
-        assertThat(result).extractingJsonPathStringValue("$.email").isEqualTo("user@mail.ru");
+        assertThat(result).extractingJsonPathStringValue("$.description").isEqualTo("Request");
     }
+
 }
