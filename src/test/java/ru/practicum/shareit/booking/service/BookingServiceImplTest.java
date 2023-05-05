@@ -183,8 +183,8 @@ public class BookingServiceImplTest {
 
         booking = Booking.builder()
                 .id(1L)
-                .start(LocalDateTime.of(2023, 5, 5, 3, 0, 0))
-                .end(LocalDateTime.of(2023, 5, 5, 6, 0, 0))
+                .start(LocalDateTime.of(2023, 6, 5, 3, 0, 0))
+                .end(LocalDateTime.of(2023, 6, 5, 6, 0, 0))
                 .item(item)
                 .booker(anotherUser)
                 .status(BookingStatus.WAITING)
@@ -193,14 +193,14 @@ public class BookingServiceImplTest {
 
         bookingFromUser = BookingFromUserDto.builder()
                 .itemId(item.getId())
-                .start(LocalDateTime.of(2023, 5, 5, 3, 0, 0))
-                .end(LocalDateTime.of(2023, 5, 5, 6, 0, 0))
+                .start(LocalDateTime.of(2023, 6, 5, 3, 0, 0))
+                .end(LocalDateTime.of(2023, 6, 5, 6, 0, 0))
                 .build();
 
         anotherBooking = Booking.builder()
                 .id(2L)
-                .start(LocalDateTime.of(2023, 5, 5, 9, 0, 0))
-                .end(LocalDateTime.of(2023, 5, 5, 12, 0, 0))
+                .start(LocalDateTime.of(2023, 6, 5, 9, 0, 0))
+                .end(LocalDateTime.of(2023, 6, 5, 12, 0, 0))
                 .item(item)
                 .booker(anotherUser)
                 .status(BookingStatus.WAITING)
@@ -209,8 +209,8 @@ public class BookingServiceImplTest {
 
         anotherBookingFromUser = BookingFromUserDto.builder()
                 .itemId(item.getId())
-                .start(LocalDateTime.of(2023, 5, 5, 9, 0, 0))
-                .end(LocalDateTime.of(2023, 5, 5, 12, 0, 0))
+                .start(LocalDateTime.of(2023, 6, 5, 9, 0, 0))
+                .end(LocalDateTime.of(2023, 6, 5, 12, 0, 0))
                 .build();
 
         bookings = List.of(booking, anotherBooking);
