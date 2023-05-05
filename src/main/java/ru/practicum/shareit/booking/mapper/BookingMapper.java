@@ -6,7 +6,6 @@ import org.mapstruct.factory.Mappers;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingForItemDto;
 import ru.practicum.shareit.booking.model.Booking;
-import ru.practicum.shareit.item.mapper.CommentMapper;
 
 @Mapper(componentModel = "spring")
 public interface BookingMapper {

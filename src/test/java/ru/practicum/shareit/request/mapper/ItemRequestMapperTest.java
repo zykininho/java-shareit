@@ -24,13 +24,12 @@ public class ItemRequestMapperTest {
     @Autowired
     ItemRequestMapper itemRequestMapper;
 
-    private static User user;
     private static ItemRequest request;
     private static ItemRequestDto requestDto;
 
     @BeforeEach
     void setUp() {
-        user = User.builder()
+        User user = User.builder()
                 .id(1L)
                 .name("user")
                 .email("user@ya.ru")

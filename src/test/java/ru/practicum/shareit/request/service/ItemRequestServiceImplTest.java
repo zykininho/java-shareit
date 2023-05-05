@@ -75,14 +75,9 @@ public class ItemRequestServiceImplTest {
     private static ItemRequestDto anotherRequestDto;
     private static ItemRequestShortDto requestFromUser;
     private static ItemRequestShortDto anotherRequestFromUser;
-    private static Item item;
-    private static Item anotherItem;
-    private static ItemDto itemDto;
-    private static ItemDto anotherItemDto;
     private static List<Item> items;
     private static List<ItemDto> itemsDto;
     private static List<ItemRequest> requests;
-    private static List<ItemRequestDto> requestsDto;
 
     @BeforeEach
     void setUp() {
@@ -92,7 +87,7 @@ public class ItemRequestServiceImplTest {
                 .email("user@ya.ru")
                 .build();
 
-        item = Item.builder()
+        Item item = Item.builder()
                 .id(1L)
                 .name("Item 1")
                 .description("Description of item 1")
@@ -100,9 +95,9 @@ public class ItemRequestServiceImplTest {
                 .owner(user)
                 .request(request)
                 .build();
-        itemDto = itemMapper.toItemDto(item);
+        ItemDto itemDto = itemMapper.toItemDto(item);
 
-        anotherItem = Item.builder()
+        Item anotherItem = Item.builder()
                 .id(2L)
                 .name("Item 2")
                 .description("Description of item 2")
@@ -110,7 +105,7 @@ public class ItemRequestServiceImplTest {
                 .owner(user)
                 .request(request)
                 .build();
-        anotherItemDto = itemMapper.toItemDto(anotherItem);
+        ItemDto anotherItemDto = itemMapper.toItemDto(anotherItem);
 
         items = List.of(item, anotherItem);
         itemsDto = List.of(itemDto, anotherItemDto);
@@ -142,7 +137,6 @@ public class ItemRequestServiceImplTest {
                 .build();
 
         requests = List.of(request, anotherRequest);
-        requestsDto = List.of(requestDto, anotherRequestDto);
     }
 
     @Test

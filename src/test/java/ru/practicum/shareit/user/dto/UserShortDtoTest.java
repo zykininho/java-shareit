@@ -51,4 +51,5 @@ public class UserShortDtoTest {
 
         assertThat(result).extractingJsonPathNumberValue("$.id").isEqualTo(1);
     }
+
 }

@@ -55,4 +55,5 @@ public class UserDtoJsonTest {
         assertThat(result).extractingJsonPathStringValue("$.name").isEqualTo("User");
         assertThat(result).extractingJsonPathStringValue("$.email").isEqualTo("user@mail.ru");
     }
+
 }
