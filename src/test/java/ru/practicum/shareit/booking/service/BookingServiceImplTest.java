@@ -903,8 +903,6 @@ public class BookingServiceImplTest {
         assertEquals(bookingsDto, foundBookingsDto);
     }
 
-    // MZykin
-
     @Test
     void getStateAllItemsOwnerBookingsWithPagination() {
         when(userRepository.findById(anyLong())).thenReturn(Optional.ofNullable(user));
@@ -980,7 +978,7 @@ public class BookingServiceImplTest {
         assertThat(thrown).isInstanceOf(RuntimeException.class);
         assertEquals(thrown.getMessage(), "Unknown state: UNSUPPORTED_STATUS");
     }
-    
+
     @Test
     void getStateCurrentItemsOwnerBookingsWithPagination() {
         when(userRepository.findById(anyLong())).thenReturn(Optional.ofNullable(user));

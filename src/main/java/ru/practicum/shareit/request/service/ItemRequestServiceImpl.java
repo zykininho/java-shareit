@@ -133,9 +133,9 @@ public class ItemRequestServiceImpl implements ItemRequestService {
 
     private void addItems(ItemRequestDto itemRequestDto) {
         List<Item> requestItems = itemRepository.findAllByRequestId(itemRequestDto.getId());
-        List<ItemDto> itemsDto = requestItems.stream().
-                map(itemMapper::toItemDto).
-                collect(Collectors.toList());
+        List<ItemDto> itemsDto = requestItems.stream()
+                .map(itemMapper::toItemDto)
+                .collect(Collectors.toList());
         itemRequestDto.setItems(itemsDto);
     }
 

@@ -149,8 +149,8 @@ class BookingControllerTest {
     @Test
     void getWrongUserBookings() throws Exception {
 
-        when(bookingService.getUserBookings(anyLong(), anyString(), anyInt(), anyInt())).
-                thenThrow(new NotFoundException());
+        when(bookingService.getUserBookings(anyLong(), anyString(), anyInt(), anyInt()))
+                .thenThrow(new NotFoundException());
 
         mvc.perform(get("/bookings")
                         .header("X-Sharer-User-Id", 100L)

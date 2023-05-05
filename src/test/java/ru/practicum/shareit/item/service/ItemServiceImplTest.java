@@ -268,7 +268,7 @@ public class ItemServiceImplTest {
         when(itemRepository.findById(item.getId())).thenReturn(Optional.empty());
 
         Throwable thrown = catchThrowable(() -> {
-            itemService.updateItem(user.getId(), item.getId()   , itemDto);
+            itemService.updateItem(user.getId(), item.getId(), itemDto);
         });
         assertThat(thrown).isInstanceOf(NotFoundException.class);
     }
@@ -308,7 +308,7 @@ public class ItemServiceImplTest {
     }
 
     @Test
-    void GetNoItemException() {
+    void getNoItemException() {
         when(userRepository.findById(anyLong())).thenReturn(Optional.ofNullable(user));
 
         when(itemRepository.findById(item.getId())).thenThrow(new NotFoundException());
