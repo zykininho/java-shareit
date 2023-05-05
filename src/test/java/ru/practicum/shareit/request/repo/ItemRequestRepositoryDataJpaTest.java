@@ -41,7 +41,6 @@ public class ItemRequestRepositoryDataJpaTest {
                 .build();
 
         anotherUser = User.builder()
-                .id(2L)
                 .name("Another user")
                 .email("another_user@ya.ru")
                 .build();

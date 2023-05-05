@@ -137,16 +137,16 @@ public class ItemServiceImplTest {
 
         bookingByAnotherUser = Booking.builder()
                 .id(1L)
-                .start(LocalDateTime.of(2023, 5, 5, 14, 52, 0))
-                .end(LocalDateTime.of(2023, 5, 5, 14, 53, 0))
+                .start(LocalDateTime.of(2023, 6, 5, 14, 52, 0))
+                .end(LocalDateTime.of(2023, 6, 5, 14, 53, 0))
                 .item(item)
                 .booker(anotherUser)
                 .status(BookingStatus.WAITING)
                 .build();
         bookingByAnotherUserDto = BookingFromUserDto.builder()
                 .itemId(item.getId())
-                .start(LocalDateTime.of(2023, 5, 5, 14, 52, 0))
-                .end(LocalDateTime.of(2023, 5, 5, 14, 53, 0))
+                .start(LocalDateTime.of(2023, 6, 5, 14, 52, 0))
+                .end(LocalDateTime.of(2023, 6, 5, 14, 53, 0))
                 .build();
 
         comment = Comment.builder()
@@ -154,14 +154,14 @@ public class ItemServiceImplTest {
                 .text("Comment 1 on item by Another ser")
                 .item(item)
                 .author(anotherUser)
-                .created(LocalDateTime.of(2023, 5, 5, 15, 0, 0))
+                .created(LocalDateTime.of(2023, 6, 5, 15, 0, 0))
                 .build();
         commentDto = commentMapper.toCommentDto(comment);
 
         request = ItemRequest.builder()
                 .id(1L)
                 .description("Request 1")
-                .created(LocalDateTime.of(2023, 5, 5, 12, 0, 0))
+                .created(LocalDateTime.of(2023, 6, 5, 12, 0, 0))
                 .requestor(anotherUser)
                 .build();
         requestDto = requestMapper.toItemRequestDto(request);
