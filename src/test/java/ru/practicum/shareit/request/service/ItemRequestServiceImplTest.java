@@ -47,9 +47,6 @@ public class ItemRequestServiceImplTest {
     @Autowired
     ItemRequestService requestService;
 
-    @Autowired
-    ItemService userService;
-
     @MockBean
     ItemRequestRepository requestRepository;
 
@@ -61,9 +58,6 @@ public class ItemRequestServiceImplTest {
 
     @Autowired
     ItemRequestMapper requestMapper;
-
-    @Autowired
-    UserMapper userMapper;
 
     @Autowired
     ItemMapper itemMapper;

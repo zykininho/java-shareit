@@ -15,13 +15,10 @@ import ru.practicum.shareit.enums.BookingState;
 import ru.practicum.shareit.enums.BookingStatus;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.ValidationException;
-import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.mapper.ItemMapper;
-import ru.practicum.shareit.item.service.ItemService;
-import ru.practicum.shareit.user.dto.UserDto;
-import ru.practicum.shareit.user.mapper.UserMapper;
+import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.item.repo.ItemRepository;
 import ru.practicum.shareit.user.model.User;
-import ru.practicum.shareit.user.service.UserService;
+import ru.practicum.shareit.user.repo.UserRepository;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -35,27 +32,22 @@ import java.util.stream.Collectors;
 public class BookingServiceImpl implements BookingService {
 
     private final BookingRepository bookingRepository;
+    private final ItemRepository itemRepository;
+    private final UserRepository userRepository;
 
-    private final ItemService itemService;
-    private final UserService userService;
     @Autowired
-
     private BookingMapper bookingMapper;
-    @Autowired
-    private ItemMapper itemMapper;
-    @Autowired
-    private UserMapper userMapper;
 
     @Override
     public BookingDto addNewBooking(long userId, BookingFromUserDto bookingFromUser) {
-        UserDto userDto = userService.getUser(userId);
+        User booker = findUser(userId);
         validateBookingDate(userId, bookingFromUser);
-        ItemDto itemDto = getValidatedBookingItem(userId, bookingFromUser);
+        Item item = getValidatedBookingItem(userId, bookingFromUser);
         LocalDateTime start = bookingFromUser.getStart();
         LocalDateTime end = bookingFromUser.getEnd();
         Booking booking = Booking.builder()
-                .booker(userMapper.toUser(userDto))
-                .item(itemMapper.toItem(itemDto))
+                .booker(booker)
+                .item(item)
                 .start(start)
                 .end(end)
                 .status(BookingStatus.WAITING)
@@ -90,23 +82,23 @@ public class BookingServiceImpl implements BookingService {
         }
     }
 
-    private ItemDto getValidatedBookingItem(long userId, BookingFromUserDto booking) {
+    private Item getValidatedBookingItem(long userId, BookingFromUserDto booking) {
         Long itemId = booking.getItemId();
         if (itemId == null) {
             log.info("У бронирования {} от user id={} указан неверный item id", booking, userId);
             throw new NotFoundException();
         }
-        ItemDto item = itemService.getItem(userId, itemId);
+        Item item = findItem(itemId);
         if (!item.getAvailable()) {
             log.info("В бронировании {} от user id={} указана недоступная вещь с id={}", booking, userId, booking.getItemId());
             throw new ValidationException();
         }
-        long ownerId = itemService.findItem(itemId).getOwner().getId();
+        long ownerId = item.getOwner().getId();
         if (ownerId == userId) {
             log.info("В бронировании {} user id={} пытается забронировать свою вещь id={}", booking, userId, booking.getItemId());
             throw new NotFoundException();
         }
-        return itemService.getItem(userId, itemId);
+        return item;
     }
 
     @Override
@@ -148,20 +140,20 @@ public class BookingServiceImpl implements BookingService {
     }
 
     private void validateBookingUpdate(long userId, Booking booking) {
-        UserDto userDto = userService.getUser(userId);
-        if (userDto.getId() != booking.getItem().getOwner().getId()) {
+        User user = findUser(userId);
+        if (user.getId() != booking.getItem().getOwner().getId()) {
             log.info("У позиции {} в бронировании {} указан другой владелец {}, обращается user с id={}",
                     booking.getItem(),
                     booking,
                     booking.getItem().getOwner(),
-                    userDto.getId());
+                    user.getId());
             throw new NotFoundException();
         }
     }
 
     @Override
     public BookingDto getBooking(long userId, long bookingId) {
-        User user = userMapper.toUser(userService.getUser(userId));
+        User user = findUser(userId);
         Booking booking = findBooking(bookingId);
         if (!(user.equals(booking.getBooker()) || user.equals(booking.getItem().getOwner()))) {
             log.info("Различаются user id={}, кто ищет бронирование, и автор бронирования id={}" +
@@ -176,7 +168,7 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public List<BookingDto> getUserBookings(long userId, String state, Integer from, Integer size) {
-        User user = userMapper.toUser(userService.getUser(userId));
+        User user = findUser(userId);
         BookingState status;
         try {
             status = BookingState.valueOf(state);
@@ -275,7 +267,7 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public List<BookingDto> getItemsOwnerBookings(long userId, String state, Integer from, Integer size) {
-        User user = userMapper.toUser(userService.getUser(userId));
+        User user = findUser(userId);
         BookingState status;
         try {
             status = BookingState.valueOf(state);
@@ -372,6 +364,17 @@ public class BookingServiceImpl implements BookingService {
                 .collect(Collectors.toList());
     }
 
+    private User findUser(long userId) {
+        if (userId == 0) {
+            throw new ValidationException();
+        }
+        Optional<User> user = userRepository.findById(userId);
+        if (user.isEmpty()) {
+            throw new NotFoundException();
+        }
+        return user.get();
+    }
+
     private void validateSearchParameters(int from, int size) {
         if (from < 0) {
             log.info("Параметр запроса 'from' должен быть больше или равен 0, указано значение {}", from);
@@ -380,6 +383,17 @@ public class BookingServiceImpl implements BookingService {
             log.info("Параметр запроса 'size' должен быть больше 0, указано значение {}", size);
             throw new ValidationException();
         }
+    }
+
+    public Item findItem(long itemId) {
+        if (itemId == 0) {
+            throw new ValidationException();
+        }
+        Optional<Item> item = itemRepository.findById(itemId);
+        if (item.isEmpty()) {
+            throw new NotFoundException();
+        }
+        return item.get();
     }
 
 }

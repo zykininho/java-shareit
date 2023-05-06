@@ -21,9 +21,8 @@ import ru.practicum.shareit.item.repo.CommentRepository;
 import ru.practicum.shareit.item.repo.ItemRepository;
 import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.request.service.ItemRequestService;
-import ru.practicum.shareit.user.mapper.UserMapper;
 import ru.practicum.shareit.user.model.User;
-import ru.practicum.shareit.user.service.UserService;
+import ru.practicum.shareit.user.repo.UserRepository;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -37,15 +36,13 @@ import java.util.stream.Collectors;
 public class ItemServiceImpl implements ItemService {
 
     private final ItemRepository itemRepository;
-    private final UserService userService;
+    private final UserRepository userRepository;
     private final BookingRepository bookingRepository;
     private final CommentRepository commentRepository;
     private final ItemRequestService itemRequestService;
 
     @Autowired
     private ItemMapper itemMapper;
-    @Autowired
-    private UserMapper userMapper;
     @Autowired
     private BookingMapper bookingMapper;
     @Autowired
@@ -55,7 +52,7 @@ public class ItemServiceImpl implements ItemService {
     public ItemDto addNewItem(long userId, ItemDto itemDto) {
         validate(itemDto);
         Item item = itemMapper.toItem(itemDto);
-        User owner = userMapper.toUser(userService.getUser(userId));
+        User owner = findUser(userId);
         item.setOwner(owner);
         long requestId = itemDto.getRequestId();
         if (requestId != 0) {
@@ -85,7 +82,7 @@ public class ItemServiceImpl implements ItemService {
             throw new NotFoundException();
         }
         Item itemToUpdate = optionalItem.get();
-        User owner = userMapper.toUser(userService.getUser(userId));
+        User owner = findUser(userId);
         if (!itemToUpdate.getOwner().equals(owner)) {
             log.info("У предмета с id {} указан другой владелец {}, обращается пользователь {}",
                     itemId,
@@ -200,7 +197,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public CommentDto addComment(long userId, long itemId, CommentDto commentDto) {
-        User author = userMapper.toUser(userService.getUser(userId));
+        User author = findUser(userId);
         Item item = findItem(itemId);
         Optional<Booking> booking = bookingRepository.findFirst1ByItemIdAndBookerIdAndEndIsBefore(itemId, userId, LocalDateTime.now());
         if (booking.isEmpty()) {
@@ -226,6 +223,17 @@ public class ItemServiceImpl implements ItemService {
                 userId,
                 itemId);
         return commentMapper.toCommentDto(savedComment);
+    }
+
+    private User findUser(long userId) {
+        if (userId == 0) {
+            throw new ValidationException();
+        }
+        Optional<User> user = userRepository.findById(userId);
+        if (user.isEmpty()) {
+            throw new NotFoundException();
+        }
+        return user.get();
     }
 
     private void validateSearchParameters(int from, int size) {

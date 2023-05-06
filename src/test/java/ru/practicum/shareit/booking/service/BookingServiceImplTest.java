@@ -51,16 +51,7 @@ import static org.mockito.Mockito.when;
 public class BookingServiceImplTest {
 
     @Autowired
-    ItemRequestService requestService;
-
-    @Autowired
-    ItemService userService;
-
-    @Autowired
     BookingService bookingService;
-
-    @MockBean
-    ItemRequestRepository requestRepository;
 
     @MockBean
     UserRepository userRepository;
@@ -73,9 +64,6 @@ public class BookingServiceImplTest {
 
     @Autowired
     ItemRequestMapper requestMapper;
-
-    @Autowired
-    UserMapper userMapper;
 
     @Autowired
     ItemMapper itemMapper;
