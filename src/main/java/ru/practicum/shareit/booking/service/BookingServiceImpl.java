@@ -23,6 +23,7 @@ import ru.practicum.shareit.user.repo.UserRepository;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -141,7 +142,7 @@ public class BookingServiceImpl implements BookingService {
 
     private void validateBookingUpdate(long userId, Booking booking) {
         User user = findUser(userId);
-        if (user.getId() != booking.getItem().getOwner().getId()) {
+        if (!Objects.equals(user.getId(), booking.getItem().getOwner().getId())) {
             log.info("У позиции {} в бронировании {} указан другой владелец {}, обращается user с id={}",
                     booking.getItem(),
                     booking,
