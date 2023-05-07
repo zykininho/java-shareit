@@ -41,16 +41,21 @@ public class ItemController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ItemDto>> getAll(@RequestHeader("X-Sharer-User-Id") long userId) {
-        log.info("Received GET-request at /items endpoint from user id={}", userId);
-        return ResponseEntity.ok().body(itemService.getOwnerItems(userId));
+    public ResponseEntity<List<ItemDto>> getAll(@RequestHeader("X-Sharer-User-Id") long userId,
+                                                @RequestParam(required = false) Integer from,
+                                                @RequestParam(required = false) Integer size) {
+        log.info("Received GET-request at /items?from={}&size={} endpoint from user id={}", from, size, userId);
+        return ResponseEntity.ok().body(itemService.getOwnerItems(userId, from, size));
     }
 
     @GetMapping("/search")
     public ResponseEntity<List<ItemDto>> search(@RequestHeader("X-Sharer-User-Id") long userId,
-                                @RequestParam String text) {
-        log.info("Received GET-request at /items/search?text={} endpoint from user id={}", text, userId);
-        return ResponseEntity.ok().body(itemService.search(userId, text));
+                                                @RequestParam String text,
+                                                @RequestParam(required = false) Integer from,
+                                                @RequestParam(required = false) Integer size) {
+        log.info("Received GET-request at /items/search?text={}&from={}&size={} endpoint from user id={}",
+                text, from, size, userId);
+        return ResponseEntity.ok().body(itemService.search(userId, text, from, size));
     }
 
     @PostMapping("/{itemId}/comment")

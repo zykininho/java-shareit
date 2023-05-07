@@ -3,6 +3,7 @@ package ru.practicum.shareit.item.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.mapper.BookingMapper;
 import ru.practicum.shareit.booking.model.Booking;
@@ -18,9 +19,10 @@ import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repo.CommentRepository;
 import ru.practicum.shareit.item.repo.ItemRepository;
-import ru.practicum.shareit.user.mapper.UserMapper;
+import ru.practicum.shareit.request.model.ItemRequest;
+import ru.practicum.shareit.request.service.ItemRequestService;
 import ru.practicum.shareit.user.model.User;
-import ru.practicum.shareit.user.service.UserService;
+import ru.practicum.shareit.user.repo.UserRepository;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -34,14 +36,13 @@ import java.util.stream.Collectors;
 public class ItemServiceImpl implements ItemService {
 
     private final ItemRepository itemRepository;
-    private final UserService userService;
+    private final UserRepository userRepository;
     private final BookingRepository bookingRepository;
     private final CommentRepository commentRepository;
+    private final ItemRequestService itemRequestService;
 
     @Autowired
     private ItemMapper itemMapper;
-    @Autowired
-    private UserMapper userMapper;
     @Autowired
     private BookingMapper bookingMapper;
     @Autowired
@@ -51,8 +52,13 @@ public class ItemServiceImpl implements ItemService {
     public ItemDto addNewItem(long userId, ItemDto itemDto) {
         validate(itemDto);
         Item item = itemMapper.toItem(itemDto);
-        User owner = userMapper.toUser(userService.getUser(userId));
+        User owner = findUser(userId);
         item.setOwner(owner);
+        long requestId = itemDto.getRequestId();
+        if (requestId != 0) {
+            ItemRequest itemRequest = itemRequestService.findById(requestId);
+            item.setRequest(itemRequest);
+        }
         return itemMapper.toItemDto(itemRepository.save(item));
     }
 
@@ -76,7 +82,7 @@ public class ItemServiceImpl implements ItemService {
             throw new NotFoundException();
         }
         Item itemToUpdate = optionalItem.get();
-        User owner = userMapper.toUser(userService.getUser(userId));
+        User owner = findUser(userId);
         if (!itemToUpdate.getOwner().equals(owner)) {
             log.info("У предмета с id {} указан другой владелец {}, обращается пользователь {}",
                     itemId,
@@ -140,8 +146,14 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<ItemDto> getOwnerItems(long userId) {
-        List<Item> ownerItems = itemRepository.findAllByOwnerId(userId);
+    public List<ItemDto> getOwnerItems(long userId, Integer from, Integer size) {
+        List<Item> ownerItems;
+        if (from != null && size != null) {
+            validateSearchParameters(from, size);
+            ownerItems = itemRepository.findAllByOwnerId(userId, PageRequest.of(from / size, size));
+        } else {
+            ownerItems = itemRepository.findAllByOwnerId(userId);
+        }
         List<ItemDto> listItemDto = new ArrayList<>();
         for (Item item : ownerItems) {
             ItemDto itemDto = itemMapper.toItemDto(item);
@@ -155,11 +167,17 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<ItemDto> search(long userId, String text) {
+    public List<ItemDto> search(long userId, String text, Integer from, Integer size) {
         if (text.isBlank()) {
             return new ArrayList<>();
         }
-        List<Item> foundItems = itemRepository.search(text);
+        List<Item> foundItems;
+        if (from != null && size != null) {
+            validateSearchParameters(from, size);
+            foundItems = itemRepository.search(text, PageRequest.of(from / size, size));
+        } else {
+            foundItems = itemRepository.search(text);
+        }
         return foundItems
                 .stream()
                 .map(itemMapper::toItemDto)
@@ -179,7 +197,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public CommentDto addComment(long userId, long itemId, CommentDto commentDto) {
-        User author = userMapper.toUser(userService.getUser(userId));
+        User author = findUser(userId);
         Item item = findItem(itemId);
         Optional<Booking> booking = bookingRepository.findFirst1ByItemIdAndBookerIdAndEndIsBefore(itemId, userId, LocalDateTime.now());
         if (booking.isEmpty()) {
@@ -206,4 +224,26 @@ public class ItemServiceImpl implements ItemService {
                 itemId);
         return commentMapper.toCommentDto(savedComment);
     }
+
+    private User findUser(long userId) {
+        if (userId == 0) {
+            throw new ValidationException();
+        }
+        Optional<User> user = userRepository.findById(userId);
+        if (user.isEmpty()) {
+            throw new NotFoundException();
+        }
+        return user.get();
+    }
+
+    private void validateSearchParameters(int from, int size) {
+        if (from < 0) {
+            log.info("Параметр запроса 'from' должен быть больше или равен 0, указано значение {}", from);
+            throw new ValidationException();
+        } else if (size <= 0) {
+            log.info("Параметр запроса 'size' должен быть больше 0, указано значение {}", size);
+            throw new ValidationException();
+        }
+    }
+
 }
