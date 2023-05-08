@@ -1,7 +1,7 @@
 version: '3.8'
 services:
   gateway:
-    build: shareit-gateway
+    build: gateway
     image: shareit-gateway-image
     container_name: shareit-gateway-container
     ports:
@@ -12,7 +12,7 @@ services:
       - SHAREIT_SERVER_URL=http://server:9090
 
   server:
-    build: shareit-server
+    build: server
     image: shareit-server-image
     container_name: shareit-server-container
     ports:
@@ -33,4 +33,4 @@ services:
       - POSTGRES_DB=shareit
       - POSTGRES_USER=share_it_user
       - POSTGRES_PASSWORD=password
-      - TZ=GMT
+      - TZ=Europe/Moscow
