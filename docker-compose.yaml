@@ -11,6 +11,7 @@ services:
     environment:
       - SHAREIT_SERVER_URL=http://server:9090
       - TZ=GMT
+    restart: on-failure
 
   server:
     build: server
@@ -25,12 +26,15 @@ services:
       - POSTGRES_USERNAME=share_it_user
       - POSTGRES_PASSWORD=password
       - TZ=GMT
+    restart: on-failure
 
   db:
     image: postgres:14-alpine
     container_name: shareit-db
     ports:
       - "6541:5432"
+    volumes:
+      - /var/lib/postgresql/data/
     environment:
       - POSTGRES_DB=shareit
       - POSTGRES_USER=share_it_user
