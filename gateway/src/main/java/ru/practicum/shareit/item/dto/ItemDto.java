@@ -12,7 +12,6 @@ import java.util.List;
 public class ItemDto {
 
     private long id;
-    @NotNull
     private String name;
     private String description;
     private Boolean available;

@@ -27,11 +27,13 @@ public class BookingController {
 
 	@GetMapping
 	public ResponseEntity<Object> getBookings(@RequestHeader("X-Sharer-User-Id") long userId,
-											  @RequestParam(name = "state", defaultValue = "all") String stateParam,
+											  @RequestParam(name = "state", required = false) String stateParam,
 											  @PositiveOrZero @RequestParam(name = "from", defaultValue = "0") Integer from,
 											  @Positive @RequestParam(name = "size", defaultValue = "10") Integer size) {
-		BookingState state = BookingState.from(stateParam)
-				.orElseThrow(() -> new IllegalArgumentException("Unknown state: " + stateParam));
+		if (stateParam == null) stateParam = "ALL";
+		String finalStateParam = stateParam;
+		BookingState state = BookingState.from(finalStateParam)
+				.orElseThrow(() -> new IllegalArgumentException("Unknown state: " + finalStateParam));
 		log.info("Received GET-request at /bookings?state={}&from={}&size={} endpoint from user id={}",
 				state, from, size, userId);
 		return bookingClient.getBookings(userId, state, from, size);
@@ -53,11 +55,13 @@ public class BookingController {
 
 	@GetMapping("/owner")
 	public ResponseEntity<Object> getItemsOwnerBookings(@RequestHeader("X-Sharer-User-Id") long userId,
-														@RequestParam(defaultValue = "all") String stateParam,
+														@RequestParam(name = "state", required = false) String stateParam,
 														@PositiveOrZero @RequestParam(defaultValue = "0") Integer from,
 														@Positive @RequestParam(defaultValue = "10") Integer size) {
-		BookingState state = BookingState.from(stateParam)
-				.orElseThrow(() -> new IllegalArgumentException("Unknown state: " + stateParam));
+		if (stateParam == null) stateParam = "ALL";
+		String finalStateParam = stateParam;
+		BookingState state = BookingState.from(finalStateParam)
+				.orElseThrow(() -> new IllegalArgumentException("Unknown state: " + finalStateParam));
 		log.info("Received GET-request at /bookings/owner?state={}&from={}&size={} endpoint from user id={}",
 				state, from, size, userId);
 		return bookingClient.getItemsOwnerBookings(userId, state, from, size);
@@ -65,8 +69,8 @@ public class BookingController {
 
 	@PatchMapping("/{bookingId}")
 	public ResponseEntity<Object> update(@RequestHeader(value = "X-Sharer-User-Id") long userId,
-											 @PathVariable long bookingId,
-											 @RequestParam String approved) {
+										 @PathVariable long bookingId,
+										 @RequestParam String approved) {
 		log.info("Received PATCH-request at /bookings/{} endpoint from user id={}", bookingId, userId);
 		return bookingClient.updateBooking(userId, bookingId, approved);
 	}
