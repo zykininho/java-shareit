@@ -21,7 +21,7 @@ import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repo.CommentRepository;
 import ru.practicum.shareit.item.repo.ItemRepository;
 import ru.practicum.shareit.request.model.ItemRequest;
-import ru.practicum.shareit.request.service.ItemRequestService;
+import ru.practicum.shareit.request.repo.ItemRequestRepository;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repo.UserRepository;
 
@@ -40,7 +40,7 @@ public class ItemServiceImpl implements ItemService {
     private final UserRepository userRepository;
     private final BookingRepository bookingRepository;
     private final CommentRepository commentRepository;
-    private final ItemRequestService itemRequestService;
+    private final ItemRequestRepository itemRequestRepository;
 
     @Autowired
     private ItemMapper itemMapper;
@@ -57,10 +57,21 @@ public class ItemServiceImpl implements ItemService {
         item.setOwner(owner);
         long requestId = itemDto.getRequestId();
         if (requestId != 0) {
-            ItemRequest itemRequest = itemRequestService.findById(requestId);
+            ItemRequest itemRequest = findRequest(requestId);
             item.setRequest(itemRequest);
         }
         return itemMapper.toItemDto(itemRepository.save(item));
+    }
+
+    private ItemRequest findRequest(long requestId) {
+        Optional<ItemRequest> optionalItemRequest = itemRequestRepository.findById(requestId);
+        if (optionalItemRequest.isEmpty()) {
+            log.info("Не найден запрос с id={}", requestId);
+            throw new NotFoundException();
+        }
+        ItemRequest itemRequest = optionalItemRequest.get();
+        log.info("Найден запрос с id={}", requestId);
+        return itemRequest;
     }
 
     private void validate(ItemDto itemDto) {
@@ -185,7 +196,7 @@ public class ItemServiceImpl implements ItemService {
                 .collect(Collectors.toList());
     }
 
-    public Item findItem(long itemId) {
+    private Item findItem(long itemId) {
         if (itemId == 0) {
             throw new ValidationException();
         }

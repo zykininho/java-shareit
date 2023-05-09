@@ -111,7 +111,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
         return user.get();
     }
 
-    public ItemRequest findById(long requestId) {
+    private ItemRequest findById(long requestId) {
         Optional<ItemRequest> optionalItemRequest = itemRequestRepository.findById(requestId);
         if (optionalItemRequest.isEmpty()) {
             log.info("Не найден запрос с id={}", requestId);
